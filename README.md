@@ -1,5 +1,5 @@
 # AutoDomain
-自动提取主域名/IP，并调用fofa、quake搜集子域名
+自动提取主域名/IP，并调用fofa、quake搜集子域名，可配合指纹扫描工具达到快速资产整理
 
 本项目所使用的fofa、quake API参考自https://github.com/EASY233/Finger
 
