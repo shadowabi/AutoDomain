@@ -95,14 +95,18 @@ def Match(url):
 	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
 	if ip and ip.group() not in rs:
 		rs.append(ip.group())
+
+
 	
 	if(search(r"(http|https)\:\/\/", url)): # 当输入URL时提取出域名
 	    url = sub(r"(http|https)\:\/\/", "", url)
 	    if (search(r"(\/|\\).*", url)):
 	        url = sub(r"(\/|\\).*", "", url)
-	domain = search(r"([a-z0-9][a-z0-9\-]*?\.(?:com|cn|net|org|gov|info|la|cc|co|jp)(?:\.(?:cn|jp))?)$", url)
-	if domain and domain[0] not in rs:
-		rs.append(domain[0])
+	domain = search(r"^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$", url) #检测是否为域名
+	if domain:
+		domain = search(r"([a-z0-9][a-z0-9\-]*?\.(?:com|cn|net|org|gov|info|la|cc|co|jp|net|edu|org|top|tk)(?:\.(?:cn|jp))?)$", domain[0])
+		if domain and domain[0] not in rs:
+			rs.append(domain[0])
 
 if __name__ == '__main__':
 	args = ap.parse_args()
