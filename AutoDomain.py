@@ -112,7 +112,7 @@ if __name__ == '__main__':
 	print("开始进行扫描：")
 	if args.file:
 		for i in open(target):
-			Match(i)
+			Match(i.strip())
 	else:
 		Match(target)
 
