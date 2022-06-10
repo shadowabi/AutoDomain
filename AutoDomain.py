@@ -3,7 +3,7 @@
 #author:Sh4d0w_小白
 
 import argparse
-from re import search
+from re import search, sub
 from os import system, _exit
 import requests
 import json
@@ -95,7 +95,11 @@ def Match(url):
 	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
 	if ip and ip.group() not in rs:
 		rs.append(ip.group())
-
+	
+	if(search(r"(http|https)\:\/\/", url)): # 当输入URL时提取出域名
+	    url = sub(r"(http|https)\:\/\/", "", url)
+	    if (search(r"(\/|\\).*", url)):
+	        url = sub(r"(\/|\\).*", "", url)
 	domain = search(r"([a-z0-9][a-z0-9\-]*?\.(?:com|cn|net|org|gov|info|la|cc|co|jp)(?:\.(?:cn|jp))?)$", url)
 	if domain and domain[0] not in rs:
 		rs.append(domain[0])
@@ -120,6 +124,13 @@ if __name__ == '__main__':
 		Generate(mode)
 
 	with open("result.txt","w+",encoding='utf8') as f:
+		f.write("主域名：\n")
+		print("主域名：")
+		for i in rs:
+			f.write(i + "\n")
+			print(i)
+		f.write("子域名：\n")
+		print("子域名：")	
 		for i in rs2:
 			f.write(i + "\n")
 			print(i)
