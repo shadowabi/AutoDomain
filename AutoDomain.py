@@ -128,12 +128,10 @@ if __name__ == '__main__':
 		Generate(mode)
 
 	with open("result.txt","w+",encoding='utf8') as f:
-		f.write("主域名：\n")
 		print("主域名：")
 		for i in rs:
 			f.write(i + "\n")
 			print(i)
-		f.write("子域名：\n")
 		print("子域名：")	
 		for i in rs2:
 			f.write(i + "\n")
