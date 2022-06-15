@@ -81,10 +81,11 @@ def Scan(mode):
 		try:
 			response = requests.get(url, timeout = 10, headers = header)
 			datas = json.loads(response.text)
-			for i in  range(len(datas["data"]["arr"])):
-				_url = datas["data"]["arr"][i]["url"]
-				if _url and _url not in rs2:
-						rs2.append(_url)
+			if datas["data"]["arr"]:
+				for i in  range(len(datas["data"]["arr"])):
+					_url = datas["data"]["arr"][i]["url"]
+					if _url and _url not in rs2:
+							rs2.append(_url)
 		except Exception as err:
 			print(err)
 			
