@@ -18,13 +18,14 @@ ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
 group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "www.baidu.com")
 group.add_argument("-f", "--file", help = "Input FILENAME", metavar = "1.txt")
-ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、all", metavar = "all", default = "all")
+ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、hunter、all", metavar = "all", default = "all")
 
 
 #配置#
 fmail = "" #填写fofa邮箱
 fkey = "" #填写fofa key
 qkey = "" #填写quake key
+hkey = "" #填写hunter key
 header = {
 	"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36"
 }	
@@ -72,12 +73,26 @@ def Scan(mode):
 						rs2.append(_url)
 		except Exception as err:
 			print(err)
+
+	if mode == "hunter":
+		keyword = base64.urlsafe_b64encode(keyword.encode()).decode()
+		url = "https://hunter.qianxin.com/openApi/search?api-key={0}&search={1}&page=1&page_size=100&is_web=3".format(
+		hkey, keyword)
+		try:
+			response = requests.get(url, timeout = 10, headers = header)
+			datas = json.loads(response.text)
+			for i in  range(len(datas["data"]["arr"])):
+				_url = datas["data"]["arr"][i]["url"]
+				if _url and _url not in rs2:
+						rs2.append(_url)
+		except Exception as err:
+			print(err)
 			
 	keyword = ""
 
 def Generate(mode):
 	global keyword
-	if mode == "fofa":
+	if mode == "fofa" or mode == "hunter":
 		grammar = "domain="
 	elif mode == "quake":
 		grammar = "domain:"
@@ -124,6 +139,8 @@ if __name__ == '__main__':
 		Generate("fofa")
 		sleep(0.1)
 		Generate("quake")
+		sleep(0.1)
+		Generate("hunter")
 	else:
 		Generate(mode)
 
