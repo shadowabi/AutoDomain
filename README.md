@@ -20,4 +20,4 @@ python AutoDomain.py [-h] [-u www.baidu.com | -f 1.txt] [-m all]
 
 ## 配置
 
-请打开AutoDomain.py文件，填写相应的fofa邮箱、key和quake的key
+请打开AutoDomain.py文件，在配置区域填写相关的key和邮箱等信息
