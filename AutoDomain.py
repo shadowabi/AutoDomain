@@ -6,19 +6,25 @@ import argparse
 from re import search, sub
 from os import system, _exit
 import requests
+from requests.adapters import HTTPAdapter
 import json
 import base64
 from urllib.parse import quote
 from time import sleep
 
-rs = [] #存放主域名结果
+Drs = [] #存放主域名结果
+Irs = [] #存放IP结果
 rs2 = [] #存放fofa、quake查询结果
 keyword = "" #存放关键词
+flag = 0 #区别IP和域名
 ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
 group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "www.baidu.com")
 group.add_argument("-f", "--file", help = "Input FILENAME", metavar = "1.txt")
 ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、hunter、all", metavar = "all", default = "all")
+s = requests.Session()
+s.mount('http://', HTTPAdapter(max_retries=3))
+s.mount('https://', HTTPAdapter(max_retries=3))
 
 
 #配置#
@@ -38,7 +44,7 @@ def Scan(mode):
 		url = "https://fofa.info/api/v1/search/all?email={0}&key={1}&qbase64={2}&full=false&fields=protocol,host&size=100".format(
 		fmail, fkey, keyword)
 		try:
-			response = requests.get(url, timeout = 10, headers = header )
+			response = s.get(url, timeout = 3, headers = header )
 			datas = json.loads(response.text)
 			if "results" in datas.keys():
 				for data in datas["results"]:
@@ -60,7 +66,7 @@ def Scan(mode):
             "size": 100
         }
 		try:
-			response = requests.post(url = "https://quake.360.cn/api/v3/search/quake_service", headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","X-QuakeToken":qkey},json = data, timeout = 10)
+			response = s.post(url = "https://quake.360.cn/api/v3/search/quake_service", headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","X-QuakeToken":qkey},json = data, timeout = 3)
 			datas = json.loads(response.text)
 			if len(datas['data']) >= 1 and datas['code'] == 0:
 				for data in datas['data']:
@@ -79,7 +85,7 @@ def Scan(mode):
 		url = "https://hunter.qianxin.com/openApi/search?api-key={0}&search={1}&page=1&page_size=100&is_web=3".format(
 		hkey, keyword)
 		try:
-			response = requests.get(url, timeout = 10, headers = header)
+			response = s.get(url, timeout = 3, headers = header)
 			datas = json.loads(response.text)
 			if datas["data"]["arr"]:
 				for i in  range(len(datas["data"]["arr"])):
@@ -94,25 +100,25 @@ def Scan(mode):
 def Generate(mode):
 	global keyword
 	if mode == "fofa" or mode == "hunter":
-		grammar = "domain="
+		grammar = "="
 	elif mode == "quake":
-		grammar = "domain:"
+		grammar = ":"
 	else:
 		print("参数错误！")
 		_exit(0)
 
-	for i in rs:
-		keyword = keyword + grammar + i + " || "
+	for i in Drs:
+		keyword = keyword + "domain" + grammar + i + " || "
+	for i in Irs:
+		keyword = keyword + "ip" + grammar + i + "||"
 	keyword = keyword.rstrip(" || ")
 
 	Scan(mode)
 
 def Match(url):
 	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
-	if ip and ip.group() not in rs:
-		rs.append(ip.group())
-
-
+	if ip and ip.group() not in Irs:
+		Irs.append(ip.group())
 	
 	if(search(r"(http|https)\:\/\/", url)): # 当输入URL时提取出域名
 	    url = sub(r"(http|https)\:\/\/", "", url)
@@ -120,9 +126,9 @@ def Match(url):
 	        url = sub(r"(\/|\\).*", "", url)
 	domain = search(r"^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$", url) #检测是否为域名
 	if domain:
-		domain = search(r"([a-z0-9][a-z0-9\-]*?\.(?:com|cn|net|org|gov|info|la|cc|co|jp|net|edu|org|top|tk)(?:\.(?:cn|jp))?)$", domain[0])
-		if domain and domain[0] not in rs:
-			rs.append(domain[0])
+		domain = search(r"([a-z0-9][a-z0-9\-]*?\.(?:\w{2,3})(?:\.(?:cn|hk))?)$", domain[0])
+		if domain and domain[0] not in Drs:
+			Drs.append(domain[0])
 
 if __name__ == '__main__':
 	args = ap.parse_args()
@@ -146,9 +152,10 @@ if __name__ == '__main__':
 		Generate(mode)
 
 	with open("result.txt","w+",encoding='utf8') as f:
-		print("主域名：")
-		for i in rs:
-			f.write(i + "\n")
+		print("主域名和IP：")
+		for i in Drs:
+			print(i)
+		for i in Irs:
 			print(i)
 		print("子域名：")	
 		for i in rs2:
