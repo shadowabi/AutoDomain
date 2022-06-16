@@ -116,7 +116,7 @@ def Generate(mode):
 	Scan(mode)
 
 def Match(url):
-	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
+	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,})", url)
 	if ip and ip.group() not in Irs:
 		Irs.append(ip.group())
 	
