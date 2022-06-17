@@ -11,6 +11,7 @@ import json
 import base64
 from urllib.parse import quote
 from time import sleep
+import traceback
 
 Drs = [] #存放主域名结果
 Irs = [] #存放IP结果
@@ -41,7 +42,7 @@ def Scan(mode):
 	_url = ""
 	if mode == "fofa":
 		keyword = base64.urlsafe_b64encode(keyword.encode()).decode()
-		url = "https://fofa.info/api/v1/search/all?email={0}&key={1}&qbase64={2}&full=false&fields=protocol,host&size=100".format(
+		url = "https://fofa.info/api/v1/search/all?email={0}&key={1}&qbase64={2}&full=false&fields=protocol,host&size=1000".format(
 		fmail, fkey, keyword)
 		try:
 			response = s.get(url, timeout = 3, headers = header )
@@ -55,9 +56,9 @@ def Scan(mode):
 					elif "" == data[0]:
 						_url = "{0}://{1}".format("http", data[1])
 					if _url and _url not in rs2:
-						rs2.append(_url)
+						rs2.append(_url.strip())
 		except Exception as err:
-			print(err)
+			traceback.print_exc()
 
 	if mode == "quake":
 		data = {
@@ -71,14 +72,14 @@ def Scan(mode):
 			if len(datas['data']) >= 1 and datas['code'] == 0:
 				for data in datas['data']:
 					port = "" if data['port'] == 80 or data["port"] == 443 else ":{}".format(str(data['port']))
-					if 'http/ssl' == data['service']['name']:
+					if 'http/ssl' == data['service']['name'] and 'http' in data['service']:
 						_url = 'https://' + data['service']['http']['host'] + port
 					elif 'http' == data['service']['name']:
 						_url = 'http://' + data['service']['http']['host'] + port
 					if _url and _url not in rs2:
-						rs2.append(_url)
+						rs2.append(_url.strip())
 		except Exception as err:
-			print(err)
+			traceback.print_exc()
 
 	if mode == "hunter":
 		keyword = base64.urlsafe_b64encode(keyword.encode()).decode()
@@ -87,13 +88,13 @@ def Scan(mode):
 		try:
 			response = s.get(url, timeout = 3, headers = header)
 			datas = json.loads(response.text)
-			if datas["data"]["arr"]:
+			if datas["data"]:
 				for i in  range(len(datas["data"]["arr"])):
 					_url = datas["data"]["arr"][i]["url"]
 					if _url and _url not in rs2:
-							rs2.append(_url)
+							rs2.append(_url.strip())
 		except Exception as err:
-			print(err)
+			traceback.print_exc()
 			
 	keyword = ""
 
@@ -108,15 +109,15 @@ def Generate(mode):
 		_exit(0)
 
 	for i in Drs:
-		keyword = keyword + "domain" + grammar + i + " || "
+		keyword = keyword + "domain" + grammar + i.strip() + " || "
 	for i in Irs:
-		keyword = keyword + "ip" + grammar + i + "||"
+		keyword = keyword + "ip" + grammar + i.strip() + " || "
 	keyword = keyword.rstrip(" || ")
-
 	Scan(mode)
 
 def Match(url):
-	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,})", url)
+	# ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2}|)", url)
+	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
 	if ip and ip.group() not in Irs:
 		Irs.append(ip.group())
 	
@@ -154,13 +155,13 @@ if __name__ == '__main__':
 	with open("result.txt","w+",encoding='utf8') as f:
 		print("主域名和IP：")
 		for i in Drs:
-			print(i)
+			print(i.strip())
 		for i in Irs:
-			print(i)
+			print(i.strip())
 		print("子域名：")	
 		for i in rs2:
-			f.write(i + "\n")
-			print(i)
+			f.write(i.strip() + "\n")
+			print(i.strip())
 
 	print("扫描结束！")
 	print("已保存到result.txt文件中，按回车键退出程序！")
