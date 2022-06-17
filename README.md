@@ -14,7 +14,8 @@ pip install -r requirements.txt
 
 ## 用法
 
-python AutoDomain.py [-h] [-u www.baidu.com | -f 1.txt] [-m all]
+python AutoDomain.py [-h] [-u www.baidu.com | -f 1.txt] [-m all]  
+注意，请勿将CDN的IP放入该工具进行扫描，否则将会严重影响扫描结果
 
 
 
