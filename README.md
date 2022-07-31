@@ -21,4 +21,4 @@ python AutoDomain.py [-h] [-u www.baidu.com | -f 1.txt] [-m all]
 
 ## 配置
 
-请打开AutoDomain.py文件，在配置区域填写相关的key和邮箱等信息
+请打开config.py文件，在配置区域填写相关的key和邮箱等信息
