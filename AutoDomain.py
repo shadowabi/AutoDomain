@@ -12,6 +12,7 @@ import base64
 from urllib.parse import quote
 from time import sleep
 import traceback
+from config import *
 
 Drs = [] #存放主域名结果
 Irs = [] #存放IP结果
@@ -27,12 +28,6 @@ s = requests.Session()
 s.mount('http://', HTTPAdapter(max_retries=3))
 s.mount('https://', HTTPAdapter(max_retries=3))
 
-
-#配置#
-fmail = "" #填写fofa邮箱
-fkey = "" #填写fofa key
-qkey = "" #填写quake key
-hkey = "" #填写hunter key
 header = {
 	"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36"
 }	
@@ -45,7 +40,7 @@ def Scan(mode):
 		url = "https://fofa.info/api/v1/search/all?email={0}&key={1}&qbase64={2}&full=false&fields=protocol,host&size=1000".format(
 		fmail, fkey, keyword)
 		try:
-			response = s.get(url, timeout = 3, headers = header )
+			response = s.get(url, timeout = 5, headers = header )
 			datas = json.loads(response.text)
 			if "results" in datas.keys():
 				for data in datas["results"]:
@@ -67,7 +62,7 @@ def Scan(mode):
             "size": 100
         }
 		try:
-			response = s.post(url = "https://quake.360.cn/api/v3/search/quake_service", headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","X-QuakeToken":qkey},json = data, timeout = 3)
+			response = s.post(url = "https://quake.360.cn/api/v3/search/quake_service", headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","X-QuakeToken":qkey},json = data, timeout = 5)
 			datas = json.loads(response.text)
 			if len(datas['data']) >= 1 and datas['code'] == 0:
 				for data in datas['data']:
@@ -86,10 +81,10 @@ def Scan(mode):
 		url = "https://hunter.qianxin.com/openApi/search?api-key={0}&search={1}&page=1&page_size=100&is_web=3".format(
 		hkey, keyword)
 		try:
-			response = s.get(url, timeout = 3, headers = header)
+			response = s.get(url, timeout = 5, headers = header)
 			datas = json.loads(response.text)
-			if datas["data"]:
-				for i in  range(len(datas["data"]["arr"])):
+			if datas["data"]["arr"]:
+				for i in range(len(datas["data"]["arr"])):
 					_url = datas["data"]["arr"][i]["url"]
 					if _url and _url not in rs2:
 							rs2.append(_url.strip())
