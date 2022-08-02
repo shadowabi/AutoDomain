@@ -2,8 +2,9 @@
 # -*- coding:utf-8 -*-
 #author:Sh4d0w_小白
 
+import grequests
 import argparse
-from re import search, sub
+from re import *
 from os import system, _exit
 import requests
 from requests.adapters import HTTPAdapter
@@ -14,20 +15,28 @@ from time import sleep
 import traceback
 from config import *
 import readline
-import socket
 import ipaddress
+from queue import Queue
+from threading import Thread
+import urllib3
+from bs4 import BeautifulSoup
+from lxml import etree
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 Drs = [] #存放主域名结果
 Irs = [] #存放IP结果
-rs2 = [] #存放fofa、quake查询结果
+rs2 = [] #存放资产测绘查询结果
 keyword = "" #存放关键词
 flag = 0 #区别IP和域名
+q = Queue() #创建队列
+modes = ["fofa","quake","hunter","google"]
 
 ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
 group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "www.baidu.com")
 group.add_argument("-f", "--file", help = "Input FILENAME", metavar = "1.txt")
-ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、hunter、all", metavar = "all", default = "all")
+ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、hunter、google、all", metavar = "all", default = "all")
 s = requests.Session()
 s.mount('http://', HTTPAdapter(max_retries=3))
 s.mount('https://', HTTPAdapter(max_retries=3))
@@ -106,15 +115,50 @@ def Scan(mode):
 							rs2.append(_url.strip())
 		except Exception as err:
 			traceback.print_exc()
+
+	if mode == "google":
+		url = "https://www.wuzhuiso.com/s?q=site:" + q.get()
+		grs = []
+		q2 = Queue()
+		for i in range(1,6):
+			url2 = url + "&pn=" + str(i)
+			try:
+				grs.append(grequests.get(url2, timeout = 5, verify = False))
+			except:
+				pass
+		for j in grequests.map(grs):
+			if j != None and j.text != "null":
+				q2.put(j.text)
+		def googlers():
+			while not q2.empty():
+				html = q2.get()
+				html = BeautifulSoup(html,'lxml')
+				html = str(html.select("cite"))
+				html = etree.HTML(text = html)
+				html = html.xpath('string(.)')
+				html = compile(r'\w{1,}\.\w{1,}\.\w{1,}').findall(html)
+				for _url in html:
+					if _url and _url not in rs2:
+						rs2.append(_url.strip())
+				q2.task_done()
+		for i in range(5):
+			t2 = Thread(target = googlers)
+			sleep(0.1)
+			t2.start()
+			t2.join(1)
+		q.task_done()
+
 			
 	keyword = ""
 
 def Generate(mode):
 	global keyword
-	if mode == "fofa" or mode == "hunter":
-		grammar = "="
-	elif mode == "quake":
-		grammar = ":"
+	grammar = ""
+	if mode in modes:
+		if mode == "fofa" or mode == "hunter":
+			grammar = "="
+		elif mode == "quake":
+			grammar = ":"
 	else:
 		print("参数错误！")
 		_exit(0)
@@ -122,6 +166,7 @@ def Generate(mode):
 	if len(Drs):
 		for i in Drs:
 			keyword = keyword + "domain" + grammar + i.strip() + " || "
+			q.put(i)
 	if len(Irs):
 		for i in Irs:
 			keyword = keyword + "ip" + grammar + i.strip() + " || "
@@ -164,11 +209,11 @@ if __name__ == '__main__':
 		Match(target)
 
 	if mode == "all":
-		Generate("fofa")
-		sleep(0.1)
-		Generate("quake")
-		sleep(0.1)
-		Generate("hunter")
+		for i in modes:
+			t1 = Thread(target = Generate, args = [i])
+			sleep(0.1)
+			t1.start()
+			t1.join()
 	else:
 		Generate(mode)
 
