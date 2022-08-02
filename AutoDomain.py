@@ -13,12 +13,16 @@ from urllib.parse import quote
 from time import sleep
 import traceback
 from config import *
+import readline
+import socket
+import ipaddress
 
 Drs = [] #存放主域名结果
 Irs = [] #存放IP结果
 rs2 = [] #存放fofa、quake查询结果
 keyword = "" #存放关键词
 flag = 0 #区别IP和域名
+
 ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
 group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "www.baidu.com")
@@ -31,6 +35,18 @@ s.mount('https://', HTTPAdapter(max_retries=3))
 header = {
 	"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36"
 }	
+
+
+def IsCDN(ip):
+	realip = 1
+	with open("cdn_ip_cidr.json", 'r', encoding='utf-8') as f:
+		cdns = json.load(f)
+	for cdn in cdns:
+		if ipaddress.ip_address(ip) in ipaddress.ip_network(cdn):
+			realip = 0
+	if realip == 1:
+		return ip
+
 
 def Scan(mode):
 	global keyword
@@ -103,18 +119,27 @@ def Generate(mode):
 		print("参数错误！")
 		_exit(0)
 
-	for i in Drs:
-		keyword = keyword + "domain" + grammar + i.strip() + " || "
-	for i in Irs:
-		keyword = keyword + "ip" + grammar + i.strip() + " || "
+	if len(Drs):
+		for i in Drs:
+			keyword = keyword + "domain" + grammar + i.strip() + " || "
+	if len(Irs):
+		for i in Irs:
+			keyword = keyword + "ip" + grammar + i.strip() + " || "
 	keyword = keyword.rstrip(" || ")
-	Scan(mode)
+	if keyword != "":
+		Scan(mode)
+	else:
+		print("无效目标，退出程序！")
+		_exit(0)
+
 
 def Match(url):
 	# ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2}|)", url)
 	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
 	if ip and ip.group() not in Irs:
-		Irs.append(ip.group())
+		good = IsCDN(ip.group())
+		if good:
+			Irs.append(good)
 	
 	if(search(r"(http|https)\:\/\/", url)): # 当输入URL时提取出域名
 	    url = sub(r"(http|https)\:\/\/", "", url)
@@ -147,7 +172,7 @@ if __name__ == '__main__':
 	else:
 		Generate(mode)
 
-	with open("result.txt","w+",encoding='utf8') as f:
+	with open("result.txt", "w+", encoding = 'utf8') as f:
 		print("主域名和IP：")
 		for i in Drs:
 			print(i.strip())
