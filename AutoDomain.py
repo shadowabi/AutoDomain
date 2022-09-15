@@ -187,16 +187,15 @@ def Match(url):
 	ips = ""
 	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2}|)", url)
 	# ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
-	if match(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}", ip.group()):
-		ips = ipaddress.ip_network(ip.group(),strict = False)
-
-	if ips and ips not in Irs:
-		good = IsCDN(ips, 2)
-	elif ip and ip.group() not in Irs:
-		good = IsCDN(ip.group())
-
-	if good:
-		Irs.append(good)
+	if ip:
+		if match(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}", ip.group()):
+			ips = ipaddress.ip_network(ip.group(),strict = False)
+		if ips and ips not in Irs:
+			good = IsCDN(ips, 2)
+		elif ip and ip.group() not in Irs:
+			good = IsCDN(ip.group())
+		if good:
+			Irs.append(good)
 	
 	if(search(r"(http|https)\:\/\/", url)): # 当输入URL时提取出域名
 	    url = sub(r"(http|https)\:\/\/", "", url)
