@@ -29,13 +29,13 @@ rs2 = [] #存放资产测绘查询结果
 keyword = "" #存放关键词
 flag = 0 #区别IP和域名
 q = Queue() #创建队列
-modes = ["fofa","quake","hunter","google"]
+modes = ["fofa","quake","hunter"]
 
 ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
 group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "www.baidu.com")
 group.add_argument("-f", "--file", help = "Input FILENAME", metavar = "1.txt")
-ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、hunter、google、all", metavar = "all", default = "all")
+ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、hunter、all", metavar = "all", default = "all")
 s = requests.Session()
 s.mount('http://', HTTPAdapter(max_retries=3))
 s.mount('https://', HTTPAdapter(max_retries=3))
@@ -45,15 +45,19 @@ header = {
 }	
 
 
-def IsCDN(ip):
+def IsCDN(ip,flag = 1):
 	realip = 1
 	with open("cdn_ip_cidr.json", 'r', encoding='utf-8') as f:
 		cdns = json.load(f)
-	for cdn in cdns:
-		if ipaddress.ip_address(ip) in ipaddress.ip_network(cdn):
-			realip = 0
+		if flag == 1:
+			for cdn in cdns:
+				if ipaddress.ip_address(ip) in ipaddress.ip_network(cdn, strict = False):
+					realip = 0
+		else:
+			if ip in cdns:
+				realip = 0
 	if realip == 1:
-		return ip
+		return str(ip)
 
 
 def Scan(mode):
@@ -86,7 +90,7 @@ def Scan(mode):
             "size": 100
         }
 		try:
-			response = s.post(url = "https://quake.360.cn/api/v3/search/quake_service", headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","X-QuakeToken":qkey},json = data, timeout = 5)
+			response = s.post(url = "https://quake.360.net/api/v3/search/quake_service", headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","X-QuakeToken":qkey},json = data, timeout = 5)
 			datas = json.loads(response.text)
 			if len(datas['data']) >= 1 and datas['code'] == 0:
 				for data in datas['data']:
@@ -115,37 +119,39 @@ def Scan(mode):
 		except Exception as err:
 			traceback.print_exc()
 
-	if mode == "google":
-		url = "https://www.wuzhuiso.com/s?q=site:" + q.get()
-		grs = []
-		q2 = Queue()
-		for i in range(1,6):
-			url2 = url + "&pn=" + str(i)
-			try:
-				grs.append(grequests.get(url2, timeout = 5, verify = False))
-			except:
-				pass
-		for j in grequests.map(grs):
-			if j != None and j.text != "null":
-				q2.put(j.text)
-		def googlers():
-			while not q2.empty():
-				html = q2.get()
-				html = BeautifulSoup(html,'lxml')
-				html = str(html.select("cite"))
-				html = etree.HTML(text = html)
-				html = html.xpath('string(.)')
-				html = compile(r'\w{1,}\.\w{1,}\.\w{1,}').findall(html)
-				for _url in html:
-					if _url and _url not in rs2:
-						rs2.append(_url.strip())
-				q2.task_done()
-		for i in range(5):
-			t2 = Thread(target = googlers)
-			sleep(0.1)
-			t2.start()
-			t2.join(1)
-		q.task_done()
+	# if mode == "google":
+	# 	print(q.get())
+	# 	url = "https://www.wuzhuiso.com/s?q=site:" + q.get()
+	# 	grs = []
+	# 	q2 = Queue()
+	# 	for i in range(1,6):
+	# 		url2 = url + "&pn=" + str(i)
+	# 		try:
+	# 			grs.append(grequests.get(url2, timeout = 5, verify = False))
+	# 		except:
+	# 			pass
+	# 	for j in grequests.map(grs):
+
+	# 		if j != None and j.text != "null":
+	# 			q2.put(j.text)
+	# 	def googlers():
+	# 		while not q2.empty():
+	# 			html = q2.get()
+	# 			html = BeautifulSoup(html,'lxml')
+	# 			html = str(html.select("cite"))
+	# 			html = etree.HTML(text = html)
+	# 			html = html.xpath('string(.)')
+	# 			html = compile(r'\w{1,}\.\w{1,}\.\w{1,}').findall(html)
+	# 			for _url in html:
+	# 				if _url and _url not in rs2:
+	# 					rs2.append(_url.strip())
+	# 			q2.task_done()
+	# 	for i in range(5):
+	# 		t2 = Thread(target = googlers)
+	# 		sleep(0.1)
+	# 		t2.start()
+	# 		t2.join(1)
+	# 	q.task_done()
 
 			
 	keyword = ""
@@ -178,12 +184,19 @@ def Generate(mode):
 
 
 def Match(url):
-	# ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2}|)", url)
-	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
-	if ip and ip.group() not in Irs:
+	ips = ""
+	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2}|)", url)
+	# ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
+	if match(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}", ip.group()):
+		ips = ipaddress.ip_network(ip.group(),strict = False)
+
+	if ips and ips not in Irs:
+		good = IsCDN(ips, 2)
+	elif ip and ip.group() not in Irs:
 		good = IsCDN(ip.group())
-		if good:
-			Irs.append(good)
+
+	if good:
+		Irs.append(good)
 	
 	if(search(r"(http|https)\:\/\/", url)): # 当输入URL时提取出域名
 	    url = sub(r"(http|https)\:\/\/", "", url)
