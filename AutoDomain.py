@@ -28,8 +28,11 @@ Irs = [] #存放IP结果
 rs2 = [] #存放资产测绘查询结果
 keyword = "" #存放关键词
 flag = 0 #区别IP和域名
+zflag = 0 #为zoomeye区分域名和IP
+zIp = [] #存放zoomeye特定url
+dIp = [] #存放zoomeye特定url
 q = Queue() #创建队列
-modes = ["fofa","quake","hunter"]
+modes = ["fofa","quake","hunter","zoomeye"]
 
 ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
@@ -37,12 +40,12 @@ group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "www.b
 group.add_argument("-f", "--file", help = "Input FILENAME", metavar = "1.txt")
 ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、hunter、all", metavar = "all", default = "all")
 s = requests.Session()
-s.mount('http://', HTTPAdapter(max_retries=3))
-s.mount('https://', HTTPAdapter(max_retries=3))
+s.mount('http://', HTTPAdapter(max_retries=5))
+s.mount('https://', HTTPAdapter(max_retries=5))
 
 header = {
 	"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36"
-}	
+}
 
 
 def IsCDN(ip,flag = 1):
@@ -61,7 +64,7 @@ def IsCDN(ip,flag = 1):
 
 
 def Scan(mode):
-	global keyword
+	global keyword,zflag
 	_url = ""
 	if mode == "fofa":
 		keyword = base64.urlsafe_b64encode(keyword.encode()).decode()
@@ -102,7 +105,8 @@ def Scan(mode):
 					if _url and _url not in rs2:
 						rs2.append(_url.strip())
 		except Exception as err:
-			traceback.print_exc()
+			# traceback.print_exc()
+			pass
 
 	if mode == "hunter":
 		keyword = base64.urlsafe_b64encode(keyword.encode()).decode()
@@ -116,6 +120,54 @@ def Scan(mode):
 					_url = datas["data"]["arr"][i]["url"]
 					if _url and _url not in rs2:
 							rs2.append(_url.strip())
+		except Exception as err:
+			traceback.print_exc()
+
+
+	if mode == "zoomeye":
+		grs = []
+		header1 = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","API-KEY":zkey}
+		if zflag - 2 >= 0:
+			for i in Irs:
+				zIp.append(("https://api.zoomeye.org/host/search?query=ip:{0}&facets=port").format(
+				i))
+			zflag -= 2
+		if zflag - 1 >= 0:
+			for i in Drs:
+				dIp.append(("https://api.zoomeye.org/domain/search?q={0}&type=1").format(
+				i))
+			zflag -= 1
+		try:
+			if(len(zIp)):
+				for i in zIp:
+					grs.append(grequests.get(i, headers = header1, timeout = 5, verify = False))
+			if (len(dIp)):
+				for i in dIp:
+					grs.append(grequests.get(i, headers = header1, timeout = 5, verify = False))
+
+			for j in grequests.map(grs):
+				if j != None and j.text != "null":
+					datas = json.loads(j.text)
+					if(datas['total'] != 0):
+						for i in range(datas['total']):
+							if("matches" in datas.keys()): #ip结果处理
+								port = str(datas['matches'][i]['portinfo']['port'])
+								if datas['matches'][i]['portinfo']['service'] == "http" or datas['matches'][i]['portinfo']['service'] == "https":
+									protocol = datas['matches'][i]['portinfo']['service'] 
+								else: 
+									protocol = ""
+								if protocol != "":
+									_url = protocol + "://" + datas['matches'][0]['ip'] + ":" + port
+								else:
+									_url = "http://" + datas['matches'][0]['ip'] + ":" + port
+								if _url and _url not in rs2:
+									rs2.append(_url.strip())
+
+							if ("list" in datas.keys()): #域名结果处理
+								_url = "http://" + datas['list'][i]['name']
+								if _url and _url not in rs2:
+									rs2.append(_url.strip())
+
 		except Exception as err:
 			traceback.print_exc()
 
@@ -157,30 +209,45 @@ def Scan(mode):
 	keyword = ""
 
 def Generate(mode):
-	global keyword
+	global keyword,zflag
 	grammar = ""
-	if mode in modes:
+	if mode in modes and mode != "zoomeye":
 		if mode == "fofa" or mode == "hunter":
 			grammar = "="
 		elif mode == "quake":
 			grammar = ":"
+
+		if len(Drs):
+			for i in Drs:
+				keyword = keyword + "domain" + grammar + i.strip() + " || "
+				q.put(i)
+		if len(Irs):
+			for i in Irs:
+				keyword = keyword + "ip" + grammar + i.strip() + " || "
+		keyword = keyword.rstrip(" || ")
+		if keyword != "":
+			Scan(mode)
+		else:
+			print("无效目标，退出程序！")
+			_exit(0)
+
+	elif mode == "zoomeye":
+		if len(Drs):
+			zflag +=1 #zflag为1时，target为域名
+		if len(Irs):
+			zflag +=2 #zflag>=2时，target存在IP
+		if zflag == 0:
+			print("无效目标，退出程序！")
+			_exit(0)
+
+		Scan(mode)
+
 	else:
 		print("参数错误！")
 		_exit(0)
 
-	if len(Drs):
-		for i in Drs:
-			keyword = keyword + "domain" + grammar + i.strip() + " || "
-			q.put(i)
-	if len(Irs):
-		for i in Irs:
-			keyword = keyword + "ip" + grammar + i.strip() + " || "
-	keyword = keyword.rstrip(" || ")
-	if keyword != "":
-		Scan(mode)
-	else:
-		print("无效目标，退出程序！")
-		_exit(0)
+
+
 
 
 def Match(url):
@@ -203,7 +270,7 @@ def Match(url):
 	        url = sub(r"(\/|\\).*", "", url)
 	domain = search(r"^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$", url) #检测是否为域名
 	if domain:
-		domain = search(r"([a-z0-9][a-z0-9\-]*?\.(?:\w{2,3})(?:\.(?:cn|hk))?)$", domain[0])
+		domain = search(r"([a-z0-9][a-z0-9\-]*?\.(?:\w{2,4})(?:\.(?:cn|hk))?)$", domain[0])
 		if domain and domain[0] not in Drs:
 			Drs.append(domain[0])
 
