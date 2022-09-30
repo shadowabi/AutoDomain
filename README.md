@@ -35,6 +35,7 @@ python AutoDomain.py [-h] [-u www.baidu.com | -f 1.txt] [-m all]
 5. 可识别URL，自动提取域名、ip
 6. 支持读文件，并采用多线程方式进行处理
 7. 批量发送网络请求部分，如zoomeye，采用协程方式进行处理
+8. 自动去重(http与https不去重）
 
 
 
