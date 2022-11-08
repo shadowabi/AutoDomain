@@ -29,16 +29,16 @@ rs2 = [] #存放资产测绘查询结果
 keyword = "" #存放关键词
 flag = 0 #区别IP和域名
 zflag = 0 #为zoomeye区分域名和IP
-zIp = [] #存放zoomeye特定url
-dIp = [] #存放zoomeye特定url
+zIp = [] #存放需要异步请求的ip
+dIp = [] #存放需要异步请求的域名
 q = Queue() #创建队列
-modes = ["fofa","quake","hunter","zoomeye"]
+modes = ["fofa","quake","hunter","zoomeye","vt"]
 
 ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
 group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "www.baidu.com")
 group.add_argument("-f", "--file", help = "Input FILENAME", metavar = "1.txt")
-ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、hunter、all", metavar = "all", default = "all")
+ap.add_argument("-m", "--mode", help = "Mode is fofa、quake、hunter、vt、all", metavar = "all", default = "all")
 s = requests.Session()
 s.mount('http://', HTTPAdapter(max_retries=5))
 s.mount('https://', HTTPAdapter(max_retries=5))
@@ -171,6 +171,27 @@ def Scan(mode):
 		except Exception as err:
 			traceback.print_exc()
 
+	if mode == "vt":
+		grs = []
+		header2 = {"X-Vt-Anti-Abuse-Header":"1","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","Accept-Ianguage":"en-US,en;q=0.9,es;q=0.8","X-Tool":"vt-ui-main"}
+		for i in Drs:
+			dIp.append(("https://www.virustotal.com/ui/domains/{0}/subdomains?relationships=resolutions&cursor=eyJsaW1pdCI6IDIwMCwgIm9mZnNldCI6IDB9&limit=200").format(i))
+		try:
+			if (len(dIp)):
+				for i in dIp:
+					grs.append(grequests.get(i, headers = header2, timeout = 10, verify = False))
+			for j in grequests.map(grs):
+				if j != None and j.text != "null":
+					datas = json.loads(j.text)
+					if (datas["data"] != 0):
+						for i in range(len(datas["data"])):
+							_url = "http://" + datas["data"][i]["id"]
+							if _url and _url not in rs2:
+								rs2.append(_url.strip())
+		except Exception as err:
+			traceback.print_exc()
+
+	keyword = ""
 	# if mode == "google":
 	# 	print(q.get())
 	# 	url = "https://www.wuzhuiso.com/s?q=site:" + q.get()
@@ -205,18 +226,14 @@ def Scan(mode):
 	# 		t2.join(1)
 	# 	q.task_done()
 
-			
-	keyword = ""
-
 def Generate(mode):
 	global keyword,zflag
 	grammar = ""
-	if mode in modes and mode != "zoomeye":
+	if mode in modes:
 		if mode == "fofa" or mode == "hunter":
 			grammar = "="
 		elif mode == "quake":
 			grammar = ":"
-
 		if len(Drs):
 			for i in Drs:
 				keyword = keyword + "domain" + grammar + i.strip() + " || "
@@ -231,14 +248,14 @@ def Generate(mode):
 			print("无效目标，退出程序！")
 			_exit(0)
 
-	elif mode == "zoomeye":
-		if len(Drs):
-			zflag +=1 #zflag为1时，target为域名
-		if len(Irs):
-			zflag +=2 #zflag>=2时，target存在IP
-		if zflag == 0:
-			print("无效目标，退出程序！")
-			_exit(0)
+		if mode == "zoomeye":
+			if len(Drs):
+				zflag +=1 #zflag为1时，target为域名
+			if len(Irs):
+				zflag +=2 #zflag>=2时，target存在IP
+			if zflag == 0:
+				print("无效目标，退出程序！")
+				_exit(0)
 
 		Scan(mode)
 
