@@ -67,6 +67,7 @@ def Scan(mode):
 	global keyword,zflag
 	_url = ""
 	if mode == "fofa":
+		print("[+]fofa is working...")
 		keyword = base64.urlsafe_b64encode(keyword.encode()).decode()
 		url = "https://fofa.info/api/v1/search/all?email={0}&key={1}&qbase64={2}&full=false&fields=protocol,host&size=1000".format(
 		fmail, fkey, keyword)
@@ -87,6 +88,7 @@ def Scan(mode):
 			traceback.print_exc()
 
 	if mode == "quake":
+		print("[+]quake is working...")
 		data = {
             "query": keyword,
             "start": 0,
@@ -109,6 +111,7 @@ def Scan(mode):
 			pass
 
 	if mode == "hunter":
+		print("[+]hunter is working...")
 		keyword = base64.urlsafe_b64encode(keyword.encode()).decode()
 		url = "https://hunter.qianxin.com/openApi/search?api-key={0}&search={1}&page=1&page_size=100&is_web=3".format(
 		hkey, keyword)
@@ -125,6 +128,7 @@ def Scan(mode):
 
 
 	if mode == "zoomeye":
+		print("[+]zoomeye is working...")
 		grs = []
 		header1 = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","API-KEY":zkey}
 		if zflag - 2 >= 0:
@@ -172,6 +176,7 @@ def Scan(mode):
 			traceback.print_exc()
 
 	if mode == "vt":
+		print("[+]virustotal is working...")
 		grs = []
 		header2 = {"X-Vt-Anti-Abuse-Header":"1","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","Accept-Ianguage":"en-US,en;q=0.9,es;q=0.8","X-Tool":"vt-ui-main"}
 		for i in Drs:
@@ -192,39 +197,6 @@ def Scan(mode):
 			traceback.print_exc()
 
 	keyword = ""
-	# if mode == "google":
-	# 	print(q.get())
-	# 	url = "https://www.wuzhuiso.com/s?q=site:" + q.get()
-	# 	grs = []
-	# 	q2 = Queue()
-	# 	for i in range(1,6):
-	# 		url2 = url + "&pn=" + str(i)
-	# 		try:
-	# 			grs.append(grequests.get(url2, timeout = 5, verify = False))
-	# 		except:
-	# 			pass
-	# 	for j in grequests.map(grs):
-
-	# 		if j != None and j.text != "null":
-	# 			q2.put(j.text)
-	# 	def googlers():
-	# 		while not q2.empty():
-	# 			html = q2.get()
-	# 			html = BeautifulSoup(html,'lxml')
-	# 			html = str(html.select("cite"))
-	# 			html = etree.HTML(text = html)
-	# 			html = html.xpath('string(.)')
-	# 			html = compile(r'\w{1,}\.\w{1,}\.\w{1,}').findall(html)
-	# 			for _url in html:
-	# 				if _url and _url not in rs2:
-	# 					rs2.append(_url.strip())
-	# 			q2.task_done()
-	# 	for i in range(5):
-	# 		t2 = Thread(target = googlers)
-	# 		sleep(0.1)
-	# 		t2.start()
-	# 		t2.join(1)
-	# 	q.task_done()
 
 def Generate(mode):
 	global keyword,zflag
@@ -237,16 +209,10 @@ def Generate(mode):
 		if len(Drs):
 			for i in Drs:
 				keyword = keyword + "domain" + grammar + i.strip() + " || "
-				q.put(i)
 		if len(Irs):
 			for i in Irs:
 				keyword = keyword + "ip" + grammar + i.strip() + " || "
 		keyword = keyword.rstrip(" || ")
-		if keyword != "":
-			Scan(mode)
-		else:
-			print("无效目标，退出程序！")
-			_exit(0)
 
 		if mode == "zoomeye":
 			if len(Drs):
@@ -263,14 +229,10 @@ def Generate(mode):
 		print("参数错误！")
 		_exit(0)
 
-
-
-
-
 def Match(url):
 	ips = ""
+	good = None
 	ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2}|)", url)
-	# ip = search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", url)
 	if ip:
 		if match(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}", ip.group()):
 			ips = ipaddress.ip_network(ip.group(),strict = False)
@@ -278,7 +240,7 @@ def Match(url):
 			good = IsCDN(ips, 2)
 		elif ip and ip.group() not in Irs:
 			good = IsCDN(ip.group())
-		if good:
+		if good != None:
 			Irs.append(good)
 	
 	if(search(r"(http|https)\:\/\/", url)): # 当输入URL时提取出域名
