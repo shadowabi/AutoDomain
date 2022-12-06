@@ -15,8 +15,7 @@ import traceback
 from config import *
 import readline
 import ipaddress
-from queue import Queue
-from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 import urllib3
 from bs4 import BeautifulSoup
 from lxml import etree
@@ -31,7 +30,6 @@ flag = 0 #区别IP和域名
 zflag = 0 #为zoomeye区分域名和IP
 zIp = [] #存放需要异步请求的ip
 dIp = [] #存放需要异步请求的域名
-q = Queue() #创建队列
 modes = ["fofa","quake","hunter","zoomeye","vt"]
 
 ap = argparse.ArgumentParser()
@@ -258,6 +256,8 @@ if __name__ == '__main__':
 	target = args.url or args.file
 	mode = args.mode
 
+
+
 	print("开始进行扫描：")
 	if args.file:
 		for i in open(target):
@@ -266,11 +266,9 @@ if __name__ == '__main__':
 		Match(target)
 
 	if mode == "all":
-		for i in modes:
-			t1 = Thread(target = Generate, args = [i])
-			sleep(0.1)
-			t1.start()
-			t1.join()
+		with ThreadPoolExecutor(max_workers = 10) as executor:
+			for i in modes:
+				future = executor.submit(Generate, i)
 	else:
 		Generate(mode)
 
