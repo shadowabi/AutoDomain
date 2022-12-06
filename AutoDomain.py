@@ -268,7 +268,7 @@ if __name__ == '__main__':
 	if mode == "all":
 		with ThreadPoolExecutor(max_workers = 10) as executor:
 			for i in modes:
-				future = executor.submit(Generate, i)
+				executor.submit(Generate, i)
 	else:
 		Generate(mode)
 
