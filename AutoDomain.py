@@ -259,18 +259,19 @@ if __name__ == '__main__':
 
 
 	print("开始进行扫描：")
-	if args.file:
-		for i in open(target):
-			Match(i.strip())
-	else:
-		Match(target)
+	with ThreadPoolExecutor(max_workers = 20) as executor:
+		if args.file:
+				for i in open(target):
+					executor.submit(Match, i.strip())
+		else:
+			executor.submit(Match, target)
 
-	if mode == "all":
-		with ThreadPoolExecutor(max_workers = 10) as executor:
+	with ThreadPoolExecutor(max_workers = 10) as executor:
+		if mode == "all":
 			for i in modes:
 				executor.submit(Generate, i)
-	else:
-		Generate(mode)
+		else:
+			executor.submit(Generate, mode)
 
 	with open("result.txt", "w+", encoding = 'utf8') as f:
 		print("主域名和IP：")
