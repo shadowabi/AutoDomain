@@ -3,4 +3,3 @@ grequests
 lxml
 requests
 urllib3
-futures
