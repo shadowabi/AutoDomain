@@ -93,7 +93,7 @@ def quake():
 	header1 = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4621.0 Safari/537.36","X-QuakeToken":qkey}
 	
 	try:
-		response = s.post(url = "https://quake.360.net/api/v3/search/quake_service", headers = header1, json = data, timeout = 5)
+		response = s.post(url = "https://quake.360.net/api/v3/search/quake_service", headers = header1, json = data, timeout = 10)
 
 		datas = json.loads(response.text)
 		if "data" in datas.keys() and datas['code'] == 0:
