@@ -42,6 +42,10 @@ Flags:
 9. 新增vt搜索引擎
 10. 新增netlas、pulsedive搜索引擎
 
+## 旧版本
+
+python版本在old分支
+
 
 
 ## 将要更新
