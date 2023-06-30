@@ -1,5 +1,0 @@
-beautifulsoup4
-grequests
-lxml
-requests
-urllib3
