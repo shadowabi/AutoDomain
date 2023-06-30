@@ -8,21 +8,24 @@ hunter API参考自https://github.com/W01fh4cker/hunter-to-excel/
 
 ## 安装
 
-pip install -r requirements.txt
+下载release中的文件  
 
 
 
 ## 用法
 
-python AutoDomain.py [-h] [-u www.baidu.com | -f 1.txt] [-m all]  
+Flags:  
+  -f, --file string   从文件中读取目标地址 (Input FILENAME)  
+  -h, --help          help for Serverless_PortScan  
+  -m, --mode string   可选择特定的测绘模块，例如fofa、quake、hunter、vt、netlas、pulsedive，默认all为全选 (Specific mapping modules can be selected, such as fofa, quake, hunter, vt, netlas, pulsedive, and all is selected by default) (default "all")  
+  -u, --url string    输入目标地址 (Input IP/DOMAIN/URL)  
 
-**注意，本工具有一定的ip-cdn检测能力，但实战中大多数ip并没有被收录在网上公开的cdn范围中，所以强烈建议请勿将已知为CDN的IP放入该工具进行扫描，否则将会严重影响扫描结果**
 
 
 
 ## 配置
 
-请打开config.py文件，在配置区域填写相关的key和邮箱等信息
+请打开config/config.json，填入相应的key或邮箱
 
 
 
@@ -45,4 +48,3 @@ python AutoDomain.py [-h] [-u www.baidu.com | -f 1.txt] [-m all]
 
 1. 增加shodan网络资产测绘
 2. 重新调整google hacking模块
-3. 采用go语言重构本程序
