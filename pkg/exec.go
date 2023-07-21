@@ -44,14 +44,14 @@ type Configure struct {
 }
 
 func ReadConfig() {
-    data, err := ioutil.ReadFile("./config/config.json")
-    if err != nil {
-        fmt.Println("请配置config.json!")
-        os.Exit(1)
-    }
+    data, _ := ioutil.ReadFile("./config/config.json")
 
     // 解码 JSON 数据
-    json.Unmarshal(data, &Config)
+    err := json.Unmarshal(data, &Config)
+    if err != nil {
+        fmt.Println("config.json配置出错!")
+        os.Exit(1)
+    }
 }
 
 func ReadFile(filename string) {
@@ -66,7 +66,6 @@ func ReadFile(filename string) {
         line := strings.TrimSpace(scan.Text())
         wg.Add(1)
         go Match(line, &wg)
-        wg.Wait()
     }
     wg.Wait()
     file.Close()
@@ -74,13 +73,13 @@ func ReadFile(filename string) {
 
 func Match(url string, wg *sync.WaitGroup) {
 	defer wg.Done()
-	mu.Lock()
-	defer mu.Unlock()
 
 	ipRegex := regexp.MustCompile(`\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:/\d{1,2}|)`)
 	ip := ipRegex.FindString(url)
 	if ip != "" {
+		mu.Lock()
 		Irs = append(Irs, ip)
+		mu.Unlock()
 	}
 
 	if strings.Contains(url, "http://") || strings.Contains(url, "https://") {
@@ -97,7 +96,9 @@ func Match(url string, wg *sync.WaitGroup) {
 		subDomainRegex := regexp.MustCompile(`([a-z0-9][a-z0-9\-]*?\.(?:\w{2,4})(?:\.(?:cn|hk))?)$`)
 		subDomain := subDomainRegex.FindString(domain)
 		if subDomain != "" && !Contains(Drs, subDomain) {
+			mu.Lock()
 			Drs = append(Drs, subDomain)
+			mu.Unlock()
 		}
 	}
 }
