@@ -38,7 +38,7 @@ jobs:
     - name: Build LINUX
       run: |
         env GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o AutoDomain_linux_amd64 main.go
-        env GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w"  -o AutoDomain_linux_arm64 main.go
+        env GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o AutoDomain_linux_arm64 main.go
 
     - name: Build WINDOWS
       run: |
@@ -47,7 +47,7 @@ jobs:
 
     - name: Create Zip Archive
       run: |
-        upx -9 AutoDomain.*
+        upx -9 AutoDomain*
         zip -r AutoDomain_linux_amd64.zip AutoDomain_linux_amd64 config/
         zip -r AutoDomain_linux_arm64.zip AutoDomain_linux_arm64 config/
         zip -r AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config/
