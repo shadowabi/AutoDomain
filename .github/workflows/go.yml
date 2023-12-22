@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
           go get .
-          apt install upx -y
+          sudo apt install upx -y
 
     - name: Get Set
       run: |
