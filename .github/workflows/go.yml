@@ -46,18 +46,30 @@ jobs:
         zip AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config
         zip AutoDomain_windows_386.zip AutoDomain_windows_386.exe config
 
-    - name: Get version
-      id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-
-    - name: Create Release
-      id: create_release
+    - name: Get latest tag
+      id: latest-tag
+      run: |
+        # 获取最新的 tag
+        LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+        echo ::set-output name=tag::${LATEST_TAG}
+    
+    - name: Increment tag
+      id: increment-tag
+      run: |
+        # 解析 tag 并递增
+        LATEST_TAG=${{ steps.latest-tag.outputs.tag }}
+        BASE_TAG=$(echo "$LATEST_TAG" | sed 's/\(.*\)\.\([0-9]*\)$/\1/')
+        VERSION=$(echo "$LATEST_TAG" | sed 's/.*\.\([0-9]*\)$/\1/')
+        NEW_VERSION=$((VERSION + 1))
+        NEW_TAG="$BASE_TAG.$NEW_VERSION"
+        echo ::set-output name=new-tag::${NEW_TAG}
+    
+    - name: Create release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: ${{steps.github_release.outputs.changelog}}
+        tag_name: ${{ steps.increment-tag.outputs.new-tag }}
+        release_name: Release ${{ steps.increment-tag.outputs.new-tag }}
         draft: false
         prerelease: false
