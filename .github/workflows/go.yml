@@ -80,7 +80,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         # 创建 Release
-        gh release create $NEW_TAG --title "Release $NEW_TAG" --notes "Release notes here"
+        gh release create $NEW_TAG --title "Release $NEW_TAG" --notes "github action自动构建"
         
         # 上传当前目录下所有 zip 文件为 Release 附件
         for zip_file in *.zip; do
