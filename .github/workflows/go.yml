@@ -70,27 +70,16 @@ jobs:
         NEW_VERSION=$((VERSION + 1))
         NEW_TAG="$BASE_TAG.$NEW_VERSION"
         echo ::set-output name=new-tag::${NEW_TAG}
-
-    - name: Create Tag
-      run: |
-        NEW_TAG=${{ steps.increment-tag.outputs.new-tag }}
-        git tag $NEW_TAG
-        git push origin $NEW_TAG
+        echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
         
-    - name: Create release
-      uses: actions/create-release@v1
+    - name: Create and Upload Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.increment-tag.outputs.new-tag }}
-        release_name: Release ${{ steps.increment-tag.outputs.new-tag }}
-        draft: false
-        prerelease: false
-
-    - name: Upload Asset
-      id: upload_asset
-      uses: softprops/action-gh-release@v1
-      with:
-        files: ./*.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # 创建 Release
+        gh release create $NEW_TAG --title "Release $NEW_TAG" --notes "Release notes here"
+        
+        # 上传当前目录下所有 zip 文件为 Release 附件
+        for zip_file in *.zip; do
+          gh release upload $NEW_TAG "$zip_file" --clobber
+        done
