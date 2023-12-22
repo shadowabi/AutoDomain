@@ -26,6 +26,7 @@ jobs:
     - name: Get Set
       run: |
           go env -w GO111MODULE=on
+          go env -w CGO_ENABLED=0
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -34,20 +35,20 @@ jobs:
 
     - name: Build LINUX
       run: |
-        env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o AutoDomain_linux_amd64 main.go
-        env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w"  -o AutoDomain_linux_arm64 main.go
+        env GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o AutoDomain_linux_amd64 main.go
+        env GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w"  -o AutoDomain_linux_arm64 main.go
 
     - name: Build WINDOWS
       run: |
-        env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o AutoDomain_windows_amd64.exe main.go
-        env CGO_ENABLED=0 GOOS=windows GOARCH=386 go build -trimpath -ldflags "-s -w" -o AutoDomain_windows_386.exe main.go
+        env GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o AutoDomain_windows_amd64.exe main.go
+        env GOOS=windows GOARCH=386 go build -trimpath -ldflags "-s -w" -o AutoDomain_windows_386.exe main.go
 
     - name: Create Zip Archive
       run: |
-        zip AutoDomain_linux_amd64.zip AutoDomain_linux_amd64 config/
-        zip AutoDomain_linux_arm64.zip AutoDomain_linux_arm64 config/
-        zip AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config/
-        zip AutoDomain_windows_386.zip AutoDomain_windows_386.exe config/
+        zip -r AutoDomain_linux_amd64.zip AutoDomain_linux_amd64 config/
+        zip -r AutoDomain_linux_arm64.zip AutoDomain_linux_arm64 config/
+        zip -r AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config/
+        zip -r AutoDomain_windows_386.zip AutoDomain_windows_386.exe config/
         
     - name: Fetch all tags
       run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
