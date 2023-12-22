@@ -21,7 +21,9 @@ jobs:
         go-version: '1.20.1'
         
     - name: Install dependencies
-      run: go get .
+      run: |
+          go get .
+          apt install upx -y
 
     - name: Get Set
       run: |
@@ -45,6 +47,7 @@ jobs:
 
     - name: Create Zip Archive
       run: |
+        upx -9 AutoDomain.*
         zip -r AutoDomain_linux_amd64.zip AutoDomain_linux_amd64 config/
         zip -r AutoDomain_linux_arm64.zip AutoDomain_linux_arm64 config/
         zip -r AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config/
