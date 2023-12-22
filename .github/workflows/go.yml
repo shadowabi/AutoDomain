@@ -46,28 +46,18 @@ jobs:
         zip AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config
         zip AutoDomain_windows_386.zip AutoDomain_windows_386.exe config
 
-    - name: Get Latest Tag
-      id: get_tag
-      run: echo ::set-output name=tag::$(git describe --abbrev=0 --tags)
-    
-    - name: Increment Tag
-      id: increment_tag
-      run: |
-        IFS='.' read -ra VERSION <<< "${{ steps.get_tag.outputs.tag }}"
-        LAST_DIGIT="${VERSION[-1]}"
-        NEXT_DIGIT=$((LAST_DIGIT + 1))
-        NEW_TAG="${VERSION[0]}.${VERSION[1]}.${NEXT_DIGIT}"
-        echo ::set-output name=tag::"${NEW_TAG}"
-    
+    - name: Get version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
     - name: Create Release
+      id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.increment_tag.outputs.tag }}
-        release_name: Release ${{ steps.increment_tag.outputs.tag }}
-        body: |
-          Release ${{ steps.increment_tag.outputs.tag }}
-          This is the first release of the project.
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: ${{steps.github_release.outputs.changelog}}
         draft: false
         prerelease: false
