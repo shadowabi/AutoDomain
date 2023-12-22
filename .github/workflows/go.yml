@@ -39,19 +39,14 @@ jobs:
         env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ${{env.flag}} -o AutoDomain_windows_amd64.exe main.go
         env CGO_ENABLED=0 GOOS=windows GOARCH=386 go build ${{env.flag}} -o AutoDomain_windows_386.exe main.go
 
-    - name: Create Zip Archive
-      run: |
-        zip AutoDomain_linux_amd64.zip AutoDomain_linux_amd64 config
-        zip AutoDomain_linux_arm64.zip AutoDomain_linux_arm64 config
-        zip AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config
-        zip AutoDomain_windows_386.zip AutoDomain_windows_386.exe config
-
     - name: Checkout code
       uses: actions/checkout@v2
       with:
         fetch-depth: 0 # 拉取所有历史记录
+        
     - name: Fetch all tags
       run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      
     - name: Get latest tag
       id: latest-tag
       run: |
@@ -71,6 +66,14 @@ jobs:
         NEW_TAG="$BASE_TAG.$NEW_VERSION"
         echo ::set-output name=new-tag::${NEW_TAG}
         echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+
+    - name: Create Zip Archive
+      run: |
+        zip AutoDomain_linux_amd64.zip AutoDomain_linux_amd64 config
+        zip AutoDomain_linux_arm64.zip AutoDomain_linux_arm64 config
+        zip AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config
+        zip AutoDomain_windows_386.zip AutoDomain_windows_386.exe config
+
         
     - name: Create and Upload Release
       env:
