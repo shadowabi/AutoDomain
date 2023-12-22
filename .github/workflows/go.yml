@@ -81,7 +81,10 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Release
+    - name: Upload Asset
+      id: upload_asset
       uses: softprops/action-gh-release@v1
       with:
         files: ./*.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
