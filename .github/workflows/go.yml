@@ -46,13 +46,20 @@ jobs:
         zip AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config
         zip AutoDomain_windows_386.zip AutoDomain_windows_386.exe config
 
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # 拉取所有历史记录
+    - name: Fetch all tags
+      run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
     - name: Get latest tag
       id: latest-tag
       run: |
         # 获取最新的 tag
         LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+        echo "Latest tag: $LATEST_TAG"
         echo ::set-output name=tag::${LATEST_TAG}
-    
+
     - name: Increment tag
       id: increment-tag
       run: |
