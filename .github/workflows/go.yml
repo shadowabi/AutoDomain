@@ -80,3 +80,8 @@ jobs:
         release_name: Release ${{ steps.increment-tag.outputs.new-tag }}
         draft: false
         prerelease: false
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./*.zip
