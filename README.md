@@ -5,13 +5,29 @@
 hunter API参考自https://github.com/W01fh4cker/hunter-to-excel/
 
 
-
 ## 安装
 
 下载release中的文件
 
 使用Makefile进行编译
 
+
+## 配置
+
+当首次运行AutoDomain时，会检测config.json文件是否存在，不存在则会自动创建
+
+config.json的填写内容应该如下：  
+```
+{
+  "FofaMail": "",
+  "FofaKey": "",
+  "QuakeKey": "",
+  "HunterKey": "",
+  "ZoomeyeKey": "",
+  "PulsediveKey": ""
+}
+```
+填入的对应内容可使用对应的指定模块
 
 
 ## 用法
@@ -48,27 +64,6 @@ Flags:
 
 Use "AutoDomain [command] --help" for more information about a command.
 ```
-
-
-
-
-## 配置
-
-当首次运行AutoDomain时，会检测config.json文件是否存在，不存在则会自动创建
-
-config.json的填写内容应该如下：  
-```
-{
-  "FofaMail": "",
-  "FofaKey": "",
-  "QuakeKey": "",
-  "HunterKey": "",
-  "ZoomeyeKey": "",
-  "PulsediveKey": ""
-}
-```
-填入的对应内容可使用对应的指定模块
-
 
 
 ## 功能列表  
