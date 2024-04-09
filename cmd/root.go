@@ -1,78 +1,64 @@
 package cmd
 
 import (
-	"os"
+	"errors"
+	cc "github.com/ivanpirog/coloredcobra"
+	"github.com/shadowabi/AutoDomain_rebuild/define"
+	"github.com/shadowabi/AutoDomain_rebuild/utils/Error"
 	"github.com/spf13/cobra"
-	exec "github.com/shadowabi/AutoDomain/pkg"
-	"strings"
-	"sync"
+	"os"
 )
-
-var (
-	file	  string
-	url		  string
-	mode 	  string
-)
-
 
 var RootCmd = &cobra.Command{
-	Use:   "Serverless_PortScan",
-	Short: "Serverless_PortScan is used to scan ports using cloud functions.",
-	Long: 
-"     _         _        ____                        _        \n" +
-"    / \\  _   _| |_ ___ |  _ \\  ___  _ __ ___   __ _(_)_ __   \n" +
-"   / _ \\| | | | __/ _ \\| | | |/ _ \\| '_ ` _ \\ / _` | | '_ \\  \n" +
-"  / ___ \\ |_| | || (_) | |_| | (_) | | | | | | (_| | | | | | \n" +
-" /_/   \\_\\__,_|\\__\\___/|____/ \\___/|_| |_| |_|\\__,_|_|_| |_| \n" +
-                                                            
-                                                            
-                                                                              
-` 
+	Use:   "AutoDomain",
+	Short: "AutoDomain is a web mapping domain name tool",
+	Long: "     _         _        ____                        _        \n" +
+		"    / \\  _   _| |_ ___ |  _ \\  ___  _ __ ___   __ _(_)_ __   \n" +
+		"   / _ \\| | | | __/ _ \\| | | |/ _ \\| '_ ` _ \\ / _` | | '_ \\  \n" +
+		"  / ___ \\ |_| | || (_) | |_| | (_) | | | | | | (_| | | | | | \n" +
+		" /_/   \\_\\__,_|\\__\\___/|____/ \\___/|_| |_| |_|\\__,_|_|_| |_| \n" +
+		` 
         github.com/shadowabi/AutoDomain
 
 AutoDomain是一个集成网络空间测绘系统的工具。
 AutoDomain is a tool for integrating cyberspace mapping systems.
 `,
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		if define.Url != "" && define.File != "" {
+			Error.HandleFatal(errors.New("参数不可以同时存在"))
+			return
+		}
+		if define.Url == "" && define.File == "" {
+			Error.HandleFatal(errors.New("必选参数为空，请输入 -u 参数或 -f 参数"))
+			return
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		_ = cmd.Help()
+	},
 }
 
-
+var logLevel string
 
 func init() {
-	exec.ReadConfig()
+	RootCmd.PersistentFlags().StringVar(&logLevel, "logLevel", "info", "设置日志等级 (Set log level) [trace|debug|info|warn|error|fatal|panic]")
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
-	RootCmd.Flags().StringVarP(&file, "file", "f", "", "从文件中读取目标地址 (Input FILENAME)")
-	RootCmd.Flags().StringVarP(&url, "url", "u", "", "输入目标地址 (Input IP/DOMAIN/URL)")
-	RootCmd.Flags().StringVarP(&mode, "mode", "m", "all" , "可选择特定的测绘模块，例如fofa、quake、hunter、vt、netlas、pulsedive，默认all为全选 (Specific mapping modules can be selected, such as fofa, quake, hunter, vt, netlas, pulsedive, and all is selected by default)")
+	RootCmd.PersistentFlags().StringVarP(&define.File, "file", "f", "", "从文件中读取目标地址 (Input FILENAME)")
+	RootCmd.PersistentFlags().StringVarP(&define.Url, "url", "u", "", "输入目标地址 (Input [ip|domain|url])")
+	RootCmd.PersistentFlags().IntVarP(&define.TimeOut, "timeout", "t", 15, "输入每个 http 请求的超时时间 (Enter the timeout period for every http request)")
+	RootCmd.PersistentFlags().StringVarP(&define.OutPut, "output", "o", "./result.txt", "输入结果文件输出的位置 (Enter the location of the scan result output)")
 }
 
-
-func Execute(){
+func Execute() {
+	cc.Init(&cc.Config{
+		RootCmd:  RootCmd,
+		Headings: cc.HiGreen + cc.Underline,
+		Commands: cc.Cyan + cc.Bold,
+		Example:  cc.Italic,
+		ExecName: cc.Bold,
+		Flags:    cc.Cyan + cc.Bold,
+	})
 	err := RootCmd.Execute()
-
-	var wg sync.WaitGroup
-    if url != "" {
-    	wg.Add(1)
-        go exec.Match(strings.TrimSpace(url), &wg)
-        wg.Wait()
-    } else if file != "" {
-        exec.ReadFile(file)
-    } else {
-    	RootCmd.Usage()
-    }
-
-    if mode == "all" {
-		for _, m := range exec.Modes {
-			wg.Add(1)
-			go exec.Generate(m, &wg)
-		}
-	} else {
-		wg.Add(1)
-		go exec.Generate(mode,&wg)
-	}
-	wg.Wait()
-	
-	exec.OutPut()
-
 	if err != nil {
 		os.Exit(1)
 	}
