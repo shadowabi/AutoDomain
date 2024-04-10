@@ -22,14 +22,11 @@ jobs:
         
     - name: Install dependencies
       run: |
-          go get .
-          sudo apt install upx -y
-
+          go mod tidy
     - name: Get Set
       run: |
           go env -w GO111MODULE=on
           go env -w CGO_ENABLED=0
-
     - name: Checkout code
       uses: actions/checkout@v2
       with:
@@ -37,21 +34,18 @@ jobs:
 
     - name: Build LINUX
       run: |
-        env GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o AutoDomain_linux_amd64 main.go
-        env GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o AutoDomain_linux_arm64 main.go
-
+        env GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o AutoDomain_linux_amd64 main/main.go
+        env GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o AutoDomain_linux_arm64 main/main.go
     - name: Build WINDOWS
       run: |
-        env GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o AutoDomain_windows_amd64.exe main.go
-        env GOOS=windows GOARCH=386 go build -trimpath -ldflags "-s -w" -o AutoDomain_windows_386.exe main.go
-
+        env GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o AutoDomain_windows_amd64.exe main/main.go
+        env GOOS=windows GOARCH=386 go build -trimpath -ldflags "-s -w" -o AutoDomain_windows_386.exe main/main.go
     - name: Create Zip Archive
       run: |
-        upx -9 AutoDomain*
-        zip -r AutoDomain_linux_amd64.zip AutoDomain_linux_amd64 config/
-        zip -r AutoDomain_linux_arm64.zip AutoDomain_linux_arm64 config/
-        zip -r AutoDomain_windows_amd64.zip AutoDomain_windows_amd64.exe config/
-        zip -r AutoDomain_windows_386.zip AutoDomain_windows_386.exe config/
+        zip -r Serverless_PortScan_linux_amd64.zip AutoDomain_linux_amd64
+        zip -r Serverless_PortScan_linux_arm64.zip AutoDomain_linux_arm64
+        zip -r Serverless_PortScan_windows_amd64.zip AutoDomain_windows_amd64.exe
+        zip -r Serverless_PortScan_windows_386.zip AutoDomain_windows_386.exe
         
     - name: Fetch all tags
       run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
@@ -63,7 +57,6 @@ jobs:
         LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
         echo "Latest tag: $LATEST_TAG"
         echo ::set-output name=tag::${LATEST_TAG}
-
     - name: Increment tag
       id: increment-tag
       run: |
@@ -75,7 +68,6 @@ jobs:
         NEW_TAG="$BASE_TAG.$NEW_VERSION"
         echo ::set-output name=new-tag::${NEW_TAG}
         echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
-
     - name: Create and Upload Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
