@@ -19,10 +19,12 @@ type Meta struct {
 }
 
 func ParseVirusTotalDomainResult(reqBody ...string) (virusTotalDomainRespList []VirusTotalDomainResponse) {
-	for _, response := range reqBody {
-		var virusTotalDomainResponse VirusTotalDomainResponse
-		Error.HandleError(json.Unmarshal([]byte(response), &virusTotalDomainResponse))
-		virusTotalDomainRespList = append(virusTotalDomainRespList, virusTotalDomainResponse)
+	if len(reqBody) != 0 {
+		for _, response := range reqBody {
+			var virusTotalDomainResponse VirusTotalDomainResponse
+			Error.HandleError(json.Unmarshal([]byte(response), &virusTotalDomainResponse))
+			virusTotalDomainRespList = append(virusTotalDomainRespList, virusTotalDomainResponse)
+		}
 	}
 	return virusTotalDomainRespList
 }

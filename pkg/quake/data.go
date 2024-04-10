@@ -35,10 +35,13 @@ type Pagination struct {
 }
 
 func ParseQuakeResult(reqBody ...string) (quakeRespList []QuakeResponse) {
-	for _, response := range reqBody {
-		var quakeResponse QuakeResponse
-		Error.HandleError(json.Unmarshal([]byte(response), &quakeResponse))
-		quakeRespList = append(quakeRespList, quakeResponse)
+	if len(reqBody) != 0 {
+		for _, response := range reqBody {
+			var quakeResponse QuakeResponse
+			Error.HandleError(json.Unmarshal([]byte(response), &quakeResponse))
+			quakeRespList = append(quakeRespList, quakeResponse)
+		}
 	}
+
 	return quakeRespList
 }

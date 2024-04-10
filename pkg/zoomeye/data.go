@@ -21,11 +21,17 @@ type PortInfo struct {
 }
 
 func ParseZoomeyeIpResult(reqBody ...string) (zoomeyeIpRespList []ZoomeyeIpResponse) {
-	for _, response := range reqBody {
-		var zoomeyeIpResponse ZoomeyeIpResponse
-		Error.HandleError(json.Unmarshal([]byte(response), &zoomeyeIpResponse))
-		if zoomeyeIpResponse.Matches[0].Honeypot == 0 {
-			zoomeyeIpRespList = append(zoomeyeIpRespList, zoomeyeIpResponse)
+	if len(reqBody) != 0 {
+		for _, response := range reqBody {
+			var zoomeyeIpResponse ZoomeyeIpResponse
+			Error.HandleError(json.Unmarshal([]byte(response), &zoomeyeIpResponse))
+			if len(zoomeyeIpResponse.Matches) != 0 {
+				for _, match := range zoomeyeIpResponse.Matches {
+					if match.Honeypot == 0 {
+						zoomeyeIpRespList = append(zoomeyeIpRespList, zoomeyeIpResponse)
+					}
+				}
+			}
 		}
 	}
 	return zoomeyeIpRespList
@@ -40,10 +46,12 @@ type SiteInfo struct {
 }
 
 func ParseZoomeyeDomainResult(reqBody ...string) (zoomeyeDomainRespList []ZoomeyeDomainResponse) {
-	for _, response := range reqBody {
-		var zoomeyeDomainResponse ZoomeyeDomainResponse
-		Error.HandleError(json.Unmarshal([]byte(response), &zoomeyeDomainResponse))
-		zoomeyeDomainRespList = append(zoomeyeDomainRespList, zoomeyeDomainResponse)
+	if len(reqBody) != 0 {
+		for _, response := range reqBody {
+			var zoomeyeDomainResponse ZoomeyeDomainResponse
+			Error.HandleError(json.Unmarshal([]byte(response), &zoomeyeDomainResponse))
+			zoomeyeDomainRespList = append(zoomeyeDomainRespList, zoomeyeDomainResponse)
+		}
 	}
 	return zoomeyeDomainRespList
 }

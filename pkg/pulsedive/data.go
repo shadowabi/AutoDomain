@@ -14,10 +14,12 @@ type PulsediveDomainResponse struct {
 }
 
 func ParsePulsediveDomainResult(reqBody ...string) (pulsediveDomainResult []PulsediveDomainResponse) {
-	for _, response := range reqBody {
-		var pulsediveDomainResponse PulsediveDomainResponse
-		Error.HandleError(json.Unmarshal([]byte(response), &pulsediveDomainResponse))
-		pulsediveDomainResult = append(pulsediveDomainResult, pulsediveDomainResponse)
+	if len(reqBody) != 0 {
+		for _, response := range reqBody {
+			var pulsediveDomainResponse PulsediveDomainResponse
+			Error.HandleError(json.Unmarshal([]byte(response), &pulsediveDomainResponse))
+			pulsediveDomainResult = append(pulsediveDomainResult, pulsediveDomainResponse)
+		}
 	}
 	return pulsediveDomainResult
 }

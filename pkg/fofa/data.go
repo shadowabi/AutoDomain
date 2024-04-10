@@ -11,10 +11,12 @@ type FofaResponse struct {
 }
 
 func ParseFofaResult(reqBody ...string) (fofaRespList []FofaResponse) {
-	for _, response := range reqBody {
-		var fofaResponse FofaResponse
-		Error.HandleError(json.Unmarshal([]byte(response), &fofaResponse))
-		fofaRespList = append(fofaRespList, fofaResponse)
+	if len(reqBody) != 0 {
+		for _, response := range reqBody {
+			var fofaResponse FofaResponse
+			Error.HandleError(json.Unmarshal([]byte(response), &fofaResponse))
+			fofaRespList = append(fofaRespList, fofaResponse)
+		}
 	}
 	return fofaRespList
 }

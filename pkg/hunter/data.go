@@ -19,10 +19,12 @@ type HunterResponse struct {
 }
 
 func ParseHunterResult(reqBody ...string) (hunterRespList []HunterResponse) {
-	for _, response := range reqBody {
-		var hunterResponse HunterResponse
-		Error.HandleError(json.Unmarshal([]byte(response), &hunterResponse))
-		hunterRespList = append(hunterRespList, hunterResponse)
+	if len(reqBody) != 0 {
+		for _, response := range reqBody {
+			var hunterResponse HunterResponse
+			Error.HandleError(json.Unmarshal([]byte(response), &hunterResponse))
+			hunterRespList = append(hunterRespList, hunterResponse)
+		}
 	}
 	return hunterRespList
 }

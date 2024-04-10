@@ -34,7 +34,6 @@ AutoDomain is a tool for integrating cyberspace mapping systems.
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		_ = cmd.Help()
 	},
 }
 

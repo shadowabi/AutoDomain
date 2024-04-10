@@ -8,10 +8,12 @@ import (
 func PurgeIpResult(zoomeyeIpResponse ...ZoomeyeIpResponse) (zoomeyeDomainResult []string) {
 	if len(zoomeyeIpResponse) != 0 {
 		for _, response := range zoomeyeIpResponse {
-			for _, v := range response.Matches {
-				if v.PortInfo.Service == "http" || v.PortInfo.Service == "https" {
-					result := strings.Join([]string{v.PortInfo.Service, "://", v.Ip, ":", fmt.Sprintf("%v", v.PortInfo.Port)}, "")
-					zoomeyeDomainResult = append(zoomeyeDomainResult, result)
+			if len(response.Matches) != 0 {
+				for _, v := range response.Matches {
+					if v.PortInfo.Service == "http" || v.PortInfo.Service == "https" {
+						result := strings.Join([]string{v.PortInfo.Service, "://", v.Ip, ":", fmt.Sprintf("%v", v.PortInfo.Port)}, "")
+						zoomeyeDomainResult = append(zoomeyeDomainResult, result)
+					}
 				}
 			}
 		}
