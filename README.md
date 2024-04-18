@@ -7,9 +7,9 @@ hunter API参考自https://github.com/W01fh4cker/hunter-to-excel/
 
 ## 安装
 
-下载release中的文件
+下载release中的二进制文件使用
 
-使用Makefile进行编译
+或使用Makefile进行编译二进制文件后使用
 
 
 ## 配置
