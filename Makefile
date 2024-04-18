@@ -1,4 +1,4 @@
-BUILD_FLAG = -ldflags "-s -w"
+BUILD_FLAG = -trimpath -ldflags "-s -w"
 BUILD_DIR = bin
 
 default: build
