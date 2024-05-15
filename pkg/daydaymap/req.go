@@ -2,6 +2,7 @@ package daydaymap
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"github.com/shadowabi/AutoDomain_rebuild/config"
 	"github.com/shadowabi/AutoDomain_rebuild/define"
@@ -11,24 +12,24 @@ import (
 	"time"
 )
 
-func DayDayMapRequest(client *http.Client, reqString string, totalList ...int) (respBody []string) {
-	if len(totalList) != 0 {
-		for _, total := range totalList {
-			data := struct {
-				Page    int    `json:"page"`
-				Size    int    `json:"page_size"`
-				Keyword string `json:"keyword"`
-			}{
-				Page:    1,
-				Size:    total,
-				Keyword: reqString,
-			}
+type DaydaymapData struct {
+	Page    int    `json:"page"`
+	Size    int    `json:"page_size"`
+	Keyword string `json:"keyword"`
+}
+
+func DayDayMapRequest(client *http.Client, page int, total int, reqStringList ...string) (respBody []string) {
+	if len(reqStringList) != 0 {
+		for _, reqString := range reqStringList {
+			reqString = base64.URLEncoding.EncodeToString([]byte(reqString))
+			data := DaydaymapData{Page: page, Size: total, Keyword: reqString}
 			dataJson, _ := json.Marshal(data)
 			dataReq := bytes.NewBuffer(dataJson)
 			req, _ := http.NewRequest("POST", "https://www.daydaymap.com/api/v1/raymap/search/all", dataReq)
 			req.Header.Set("User-Agent", define.UserAgent)
 			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set("api-key", config.C.DaydaymapKey)
+
 			resp, err := client.Do(req)
 			time.Sleep(500 * time.Millisecond)
 			Error.HandleError(err)

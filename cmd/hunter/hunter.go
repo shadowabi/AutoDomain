@@ -31,15 +31,19 @@ var HunterCmd = &cobra.Command{
 
 		client := pkg.GenerateHTTPClient(define.TimeOut)
 
-		reqString := pkg.MergeReqListToReqString("hunter", define.ReqIpList, define.ReqDomainList)
-		reqBody := hunter.HunterRequest(client, reqString, 1)
+		reqStringList := pkg.MergeReqListToReqStringList("hunter", define.ReqIpList, define.ReqDomainList)
+		reqBody := hunter.HunterRequest(client, 1, reqStringList...)
 		reqResult := hunter.ParseHunterResult(reqBody...)
 
-		if int(reqResult[0].Data.Total) > 100 {
-			pageList := net2.GeneratePageList(reqResult[0].Data.Total)
-			reqBody2 := hunter.HunterRequest(client, reqString, pageList...)
-			reqResult2 := hunter.ParseHunterResult(reqBody2...)
-			reqResult = append(reqResult, reqResult2...)
+		for i, _ := range reqResult {
+			if int(reqResult[i].Data.Total) > 1000 {
+				pageList := net2.GeneratePageList(reqResult[i].Data.Total)
+				for _, v := range pageList {
+					reqBody2 := hunter.HunterRequest(client, v, reqStringList[i])
+					reqResult2 := hunter.ParseHunterResult(reqBody2...)
+					reqResult = append(reqResult, reqResult2...)
+				}
+			}
 		}
 
 		chanNum := cap(reqResult)

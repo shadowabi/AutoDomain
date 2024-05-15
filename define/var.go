@@ -32,9 +32,10 @@ type Configure struct {
 }
 
 var ModeToGrammar = map[string]string{
-	"fofa":   "=",
-	"hunter": "=",
-	"quake":  ":",
+	"fofa":      "=",
+	"hunter":    "=",
+	"quake":     ":",
+	"daydaymap": ":",
 }
 
 var Once sync.Once

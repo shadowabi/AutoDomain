@@ -27,7 +27,7 @@ import (
 )
 
 func init() {
-	log.Init("trace")
+	log.Init("info")
 	configFile := pkg.GetPwd()
 	configFile = strings.Join([]string{configFile, "/config.json"}, "")
 	err := File.FileNonExistCreate(configFile)

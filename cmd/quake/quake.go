@@ -31,15 +31,19 @@ var QuakeCmd = &cobra.Command{
 
 		client := pkg.GenerateHTTPClient(define.TimeOut)
 
-		reqString := pkg.MergeReqListToReqString("quake", define.ReqIpList, define.ReqDomainList)
-		reqBody := quake.QuakeRequest(client, reqString, 1)
+		reqStringList := pkg.MergeReqListToReqStringList("quake", define.ReqIpList, define.ReqDomainList)
+		reqBody := quake.QuakeRequest(client, 1, reqStringList...)
 		reqResult := quake.ParseQuakeResult(reqBody...)
 
-		if int(reqResult[0].Meta.Pagination.Total) > 100 {
-			pageList := net2.GeneratePageList(reqResult[0].Meta.Pagination.Total)
-			reqBody2 := quake.QuakeRequest(client, reqString, pageList...)
-			reqResult2 := quake.ParseQuakeResult(reqBody2...)
-			reqResult = append(reqResult, reqResult2...)
+		for i, _ := range reqResult {
+			if int(reqResult[i].Meta.Pagination.Total) > 100 {
+				pageList := net2.GeneratePageList(reqResult[i].Meta.Pagination.Total)
+				for _, v := range pageList {
+					reqBody2 := quake.QuakeRequest(client, v, reqStringList[i])
+					reqResult2 := quake.ParseQuakeResult(reqBody2...)
+					reqResult = append(reqResult, reqResult2...)
+				}
+			}
 		}
 
 		chanNum := cap(reqResult)

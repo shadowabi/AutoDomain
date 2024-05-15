@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/shadowabi/AutoDomain_rebuild/define"
 	"github.com/shadowabi/AutoDomain_rebuild/utils/Compare"
 	"github.com/shadowabi/AutoDomain_rebuild/utils/Error"
@@ -66,18 +67,17 @@ func ConvertToReqDomainList(param ...string) (reqDomainList []string) {
 	return reqDomainList
 }
 
-func MergeReqListToReqString(mode string, reqIpList []string, reqDomainList []string) (reqString string) {
+func MergeReqListToReqStringList(mode string, reqIpList []string, reqDomainList []string) (reqStringList []string) {
 	grammar := define.ModeToGrammar[mode]
 	if grammar != "" {
 		for _, host := range reqIpList {
-			reqString += "ip" + grammar + host + " || "
+			reqStringList = append(reqStringList, fmt.Sprintf("ip%v\"%v\"", grammar, host))
 		}
 		for _, host := range reqDomainList {
-			reqString += "domain" + grammar + host + " || "
+			reqStringList = append(reqStringList, fmt.Sprintf("domain%v\"%v\"", grammar, host))
 		}
 	}
-	reqString = strings.TrimSuffix(reqString, " || ")
-	return reqString
+	return reqStringList
 }
 
 func FetchResultFromChanel(resultChannel chan []string) {

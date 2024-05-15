@@ -30,15 +30,19 @@ var FofaCmd = &cobra.Command{
 		fmt.Printf("[+] fofa is working...\n")
 
 		client := pkg.GenerateHTTPClient(define.TimeOut)
-		reqString := pkg.MergeReqListToReqString("fofa", define.ReqIpList, define.ReqDomainList)
-		reqBody := fofa.FofaRequest(client, reqString, 1)
+		reqStringList := pkg.MergeReqListToReqStringList("fofa", define.ReqIpList, define.ReqDomainList)
+		reqBody := fofa.FofaRequest(client, 1, reqStringList...)
 		reqResult := fofa.ParseFofaResult(reqBody...)
 
-		if int(reqResult[0].Size) > 1000 {
-			pageList := net2.GeneratePageList(reqResult[0].Size)
-			reqBody2 := fofa.FofaRequest(client, reqString, pageList...)
-			reqResult2 := fofa.ParseFofaResult(reqBody2...)
-			reqResult = append(reqResult, reqResult2...)
+		for i, _ := range reqResult {
+			if int(reqResult[i].Size) > 1000 {
+				pageList := net2.GeneratePageList(reqResult[i].Size)
+				for _, v := range pageList {
+					reqBody2 := fofa.FofaRequest(client, v, reqStringList[i])
+					reqResult2 := fofa.ParseFofaResult(reqBody2...)
+					reqResult = append(reqResult, reqResult2...)
+				}
+			}
 		}
 
 		chanNum := cap(reqResult)

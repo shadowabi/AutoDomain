@@ -11,10 +11,10 @@ import (
 	"time"
 )
 
-func QuakeRequest(client *http.Client, reqString string, page ...int) (respBody []string) {
-	if len(page) != 0 {
-		for _, num := range page {
-			data := strings.NewReader(fmt.Sprintf("query=%s&start=%v&size=100&include=service.name&include=port&include=service.http.host", reqString, num))
+func QuakeRequest(client *http.Client, page int, reqStringList ...string) (respBody []string) {
+	if len(reqStringList) != 0 {
+		for _, reqString := range reqStringList {
+			data := strings.NewReader(fmt.Sprintf("query=%s&start=%v&size=100&include=service.name&include=port&include=service.http.host", reqString, page))
 			req, _ := http.NewRequest("POST", "https://quake.360.net/api/v3/search/quake_service", data)
 			req.Header.Set("User-Agent", define.UserAgent)
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")

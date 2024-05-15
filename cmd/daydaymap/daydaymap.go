@@ -29,11 +29,24 @@ var DaydayMapCmd = &cobra.Command{
 		fmt.Printf("[+] daydaymap is working...\n")
 
 		client := pkg.GenerateHTTPClient(define.TimeOut)
-		reqString := daydaymap.MergeReqListToReqString(define.ReqIpList, define.ReqDomainList)
-		reqBody := daydaymap.DayDayMapRequest(client, reqString, 1) // find result total
+		reqStringList := pkg.MergeReqListToReqStringList("daydaymap", define.ReqIpList, define.ReqDomainList)
+		reqBody := daydaymap.DayDayMapRequest(client, 1, 1, reqStringList...)
 		reqResult := daydaymap.ParseDaydaymapResult(reqBody...)
-		reqBody = daydaymap.DayDayMapRequest(client, reqString, reqResult[0].Data.Total) // real query
-		reqResult = daydaymap.ParseDaydaymapResult(reqBody...)
+
+		for i, _ := range reqResult {
+			if int(reqResult[i].Data.Total) == 0 {
+				continue
+			}
+			if int(reqResult[i].Data.Total) > 10000 {
+				for j := 1; i <= reqResult[i].Data.Total/10000; j++ {
+					reqBody = daydaymap.DayDayMapRequest(client, j, 10000, reqStringList[i])
+					reqResult = append(reqResult, daydaymap.ParseDaydaymapResult(reqBody...)...)
+				}
+			} else {
+				reqBody = daydaymap.DayDayMapRequest(client, 1, reqResult[i].Data.Total, reqStringList[i])
+				reqResult = append(reqResult, daydaymap.ParseDaydaymapResult(reqBody...)...)
+			}
+		}
 
 		chanNum := cap(reqResult)
 		if chanNum != 0 {
@@ -43,7 +56,6 @@ var DaydayMapCmd = &cobra.Command{
 
 			pkg.FetchResultFromChanel(resultChannel)
 		}
-
 		fmt.Printf("[+] daydaymap search complete\n")
 	},
 }
