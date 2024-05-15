@@ -36,7 +36,7 @@ var ZoomeyeCmd = &cobra.Command{
 		reqDomainBody := zoomeye.ZoomeyeDomainRequest(client, define.ReqDomainList...)
 		reqDomainResultList := zoomeye.ParseZoomeyeDomainResult(reqDomainBody...)
 
-		chanNum := len(reqDomainResultList) + len(reqIpResultList)
+		chanNum := cap(reqDomainResultList) + cap(reqIpResultList)
 		if chanNum != 0 {
 			resultChannel := make(chan []string, chanNum)
 			if len(reqDomainResultList) != 0 {

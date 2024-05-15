@@ -31,7 +31,7 @@ var NetlasCmd = &cobra.Command{
 		reqIpBody := netlas.NetlasIpRequest(client, define.ReqIpList...)
 		reqIpResultList := netlas.ParseNetlasIpResult(reqIpBody...)
 
-		chanNum := len(reqDomainResultList) + len(reqIpResultList)
+		chanNum := cap(reqDomainResultList) + cap(reqIpResultList)
 		if chanNum != 0 {
 			resultChannel := make(chan []string, chanNum)
 			if len(reqDomainResultList) != 0 {

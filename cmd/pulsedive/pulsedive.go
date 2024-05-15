@@ -33,7 +33,7 @@ var PulsediveCmd = &cobra.Command{
 		reqDomainBody := pulsedive.PulsediveDomainRequest(client, define.ReqDomainList...)
 		reqDomainResultList := pulsedive.ParsePulsediveDomainResult(reqDomainBody...)
 
-		chanNum := len(reqDomainResultList)
+		chanNum := cap(reqDomainResultList)
 		if chanNum != 0 {
 			resultChannel := make(chan []string, chanNum)
 			resultChannel <- pulsedive.PurgeDomainResult(reqDomainResultList...)

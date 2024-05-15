@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/shadowabi/AutoDomain_rebuild/cmd"
 	_ "github.com/shadowabi/AutoDomain_rebuild/cmd/all"
+	_ "github.com/shadowabi/AutoDomain_rebuild/cmd/daydaymap"
 	_ "github.com/shadowabi/AutoDomain_rebuild/cmd/fofa"
 	_ "github.com/shadowabi/AutoDomain_rebuild/cmd/hunter"
 	_ "github.com/shadowabi/AutoDomain_rebuild/cmd/netlas"

@@ -42,7 +42,7 @@ var QuakeCmd = &cobra.Command{
 			reqResult = append(reqResult, reqResult2...)
 		}
 
-		chanNum := len(reqResult)
+		chanNum := cap(reqResult)
 		if chanNum != 0 {
 			resultChannel := make(chan []string, chanNum)
 			resultChannel <- quake.PurgeDomainResult(reqResult...)

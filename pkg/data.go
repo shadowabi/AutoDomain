@@ -69,11 +69,11 @@ func ConvertToReqDomainList(param ...string) (reqDomainList []string) {
 func MergeReqListToReqString(mode string, reqIpList []string, reqDomainList []string) (reqString string) {
 	grammar := define.ModeToGrammar[mode]
 	if grammar != "" {
-		for _, ip := range reqIpList {
-			reqString += "ip" + grammar + ip + " || "
+		for _, host := range reqIpList {
+			reqString += "ip" + grammar + host + " || "
 		}
-		for _, ip := range reqDomainList {
-			reqString += "domain" + grammar + ip + " || "
+		for _, host := range reqDomainList {
+			reqString += "domain" + grammar + host + " || "
 		}
 	}
 	reqString = strings.TrimSuffix(reqString, " || ")

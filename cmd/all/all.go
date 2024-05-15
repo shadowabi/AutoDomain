@@ -2,6 +2,7 @@ package all
 
 import (
 	"github.com/shadowabi/AutoDomain_rebuild/cmd"
+	"github.com/shadowabi/AutoDomain_rebuild/cmd/daydaymap"
 	"github.com/shadowabi/AutoDomain_rebuild/cmd/fofa"
 	"github.com/shadowabi/AutoDomain_rebuild/cmd/hunter"
 	"github.com/shadowabi/AutoDomain_rebuild/cmd/netlas"
@@ -23,6 +24,7 @@ func init() {
 	AllCmd.AddCommand(quake.QuakeCmd)
 	AllCmd.AddCommand(virustotal.VirusTotalCmd)
 	AllCmd.AddCommand(zoomeye.ZoomeyeCmd)
+	AllCmd.AddCommand(daydaymap.DaydayMapCmd)
 }
 
 var AllCmd = &cobra.Command{

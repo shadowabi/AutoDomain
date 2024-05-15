@@ -28,7 +28,7 @@ var VirusTotalCmd = &cobra.Command{
 		reqDomainBody := virustotal.VirusTotalDomainRequest(client, define.ReqDomainList...)
 		reqDomainResultList := virustotal.ParseVirusTotalDomainResult(reqDomainBody...)
 
-		chanNum := len(reqDomainResultList)
+		chanNum := cap(reqDomainResultList)
 		if chanNum != 0 {
 			resultChannel := make(chan []string, chanNum)
 			resultChannel <- virustotal.PurgeDomainResult(reqDomainResultList...)

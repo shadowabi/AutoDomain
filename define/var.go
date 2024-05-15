@@ -28,6 +28,7 @@ type Configure struct {
 	HunterKey    string `mapstructure:"HunterKey" json:"HunterKey" yaml:"HunterKey"`
 	ZoomeyeKey   string `mapstructure:"ZoomeyeKey" json:"ZoomeyeKey" yaml:"ZoomeyeKey"`
 	PulsediveKey string `mapstructure:"PulsediveKey" json:"PulsediveKey" yaml:"PulsediveKey"`
+	DaydaymapKey string `mapstructure:"DaydaymapKey" json:"DaydaymapKey" yaml:"DaydaymapKey"`
 }
 
 var ModeToGrammar = map[string]string{
