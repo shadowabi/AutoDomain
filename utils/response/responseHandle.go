@@ -2,15 +2,19 @@ package net2
 
 import (
 	"bytes"
-	"github.com/shadowabi/AutoDomain_rebuild/utils/Error"
 	"io"
 	"net/http"
 )
 
 func HandleResponse(resp *http.Response) (bodyString string) {
+	if resp == nil {
+		return ""
+	}
 	bodyBuf := new(bytes.Buffer)
 	_, err := io.Copy(bodyBuf, resp.Body)
-	Error.HandleError(err)
+	if err != nil {
+		return ""
+	}
 	bodyString = bodyBuf.String()
 	return bodyString
 }
