@@ -3,7 +3,6 @@ package virustotal
 import (
 	"fmt"
 	"github.com/shadowabi/AutoDomain_rebuild/define"
-	"github.com/shadowabi/AutoDomain_rebuild/utils/Error"
 	net2 "github.com/shadowabi/AutoDomain_rebuild/utils/response"
 	"net/http"
 	"time"
@@ -21,7 +20,9 @@ func VirusTotalDomainRequest(client *http.Client, reqDomainList ...string) (resp
 
 			resp, err := client.Do(req)
 			time.Sleep(500 * time.Millisecond)
-			Error.HandleError(err)
+			if err != nil {
+				continue
+			}
 			responseDomainList = append(responseDomainList, net2.HandleResponse(resp))
 		}
 	}

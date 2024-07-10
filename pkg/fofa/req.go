@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/shadowabi/AutoDomain_rebuild/config"
 	"github.com/shadowabi/AutoDomain_rebuild/define"
-	"github.com/shadowabi/AutoDomain_rebuild/utils/Error"
 	net2 "github.com/shadowabi/AutoDomain_rebuild/utils/response"
 	"net/http"
 	"time"
@@ -22,7 +21,9 @@ func FofaRequest(client *http.Client, page int, reqStringList ...string) (respBo
 
 			resp, err := client.Do(req)
 			time.Sleep(500 * time.Millisecond)
-			Error.HandleError(err)
+			if err != nil {
+				continue
+			}
 			respBody = append(respBody, net2.HandleResponse(resp))
 			resp.Body.Close()
 		}

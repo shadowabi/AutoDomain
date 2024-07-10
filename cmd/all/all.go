@@ -47,6 +47,7 @@ var AllCmd = &cobra.Command{
 
 				go func(child *cobra.Command) {
 					child.Run(cmd, args)
+
 					wg.Done()
 				}(child)
 			}

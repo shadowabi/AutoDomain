@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/shadowabi/AutoDomain_rebuild/define"
 	"github.com/shadowabi/AutoDomain_rebuild/utils/Error"
 	"github.com/spf13/viper"
@@ -11,41 +12,53 @@ type Config struct {
 	*viper.Viper
 }
 
-// GlobalConfig default Global Variable for Config
-var GlobalConfig *Config
+var GlobalConfig *viper.Viper
 
 var C define.Configure
 
-// DefaultInit func is default Init Config file without config file information
-func DefaultInit() {
-	GlobalConfig = &Config{
-		viper.New(),
-	}
+//// DefaultInit func is default Init Config file without config file information
+//func DefaultInit() {
+//	GlobalConfig = &Config{
+//		viper.New(),
+//	}
+//
+//	// Config filename (no suffix)
+//	GlobalConfig.SetConfigName("config")
+//
+//	// Config Type
+//	GlobalConfig.SetConfigType("yaml")
+//
+//	// Searching Path
+//	GlobalConfig.AddConfigPath(".")
+//	GlobalConfig.AddConfigPath("../") // For Debug
+//	GlobalConfig.AddConfigPath("./config")
+//
+//	// Reading Config
+//	err := GlobalConfig.ReadInConfig()
+//	Error.HandleFatal(err)
+//}
 
-	// Config filename (no suffix)
-	GlobalConfig.SetConfigName("config")
-
-	// Config Type
+func InitConfigure(file string) {
+	GlobalConfig = viper.New()
+	GlobalConfig.SetConfigFile(file)
 	GlobalConfig.SetConfigType("yaml")
-
-	// Searching Path
-	GlobalConfig.AddConfigPath(".")
-	GlobalConfig.AddConfigPath("../") // For Debug
-	GlobalConfig.AddConfigPath("./config")
-
-	// Reading Config
 	err := GlobalConfig.ReadInConfig()
-	Error.HandleFatal(err)
+	if err != nil {
+		SaveConfig(file)
+		Error.HandleFatal(fmt.Errorf("不存在 config.yaml，已生成"))
+	}
+	Error.HandleError(GlobalConfig.Unmarshal(&C))
 }
 
-// SpecificInit func is Init with specific Config file
-func SpecificInit(file string) {
-	GlobalConfig = &Config{
-		viper.New(),
-	}
+func SaveConfig(file string) {
+	GlobalConfig.Set("FofaMail", "")
+	GlobalConfig.Set("FofaKey", "")
+	GlobalConfig.Set("QuakeKey", "")
+	GlobalConfig.Set("HunterKey", "")
+	GlobalConfig.Set("ZoomeyeKey", "")
+	GlobalConfig.Set("PulsediveKey", "")
+	GlobalConfig.Set("DaydaymapKey", "")
 	GlobalConfig.SetConfigFile(file)
-	GlobalConfig.SetConfigType("json")
-	err := GlobalConfig.ReadInConfig()
+	err := GlobalConfig.WriteConfig()
 	Error.HandleFatal(err)
-	Error.HandleError(GlobalConfig.Unmarshal(&C))
 }

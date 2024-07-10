@@ -3,7 +3,6 @@ package netlas
 import (
 	"fmt"
 	"github.com/shadowabi/AutoDomain_rebuild/define"
-	"github.com/shadowabi/AutoDomain_rebuild/utils/Error"
 	net2 "github.com/shadowabi/AutoDomain_rebuild/utils/response"
 	"net/http"
 	"time"
@@ -18,7 +17,9 @@ func NetlasDomainRequest(client *http.Client, reqDomainList ...string) (response
 
 			resp, err := client.Do(req)
 			time.Sleep(500 * time.Millisecond)
-			Error.HandleError(err)
+			if err != nil {
+				continue
+			}
 			responseDomainList = append(responseDomainList, net2.HandleResponse(resp))
 		}
 	}
@@ -33,7 +34,9 @@ func NetlasIpRequest(client *http.Client, reqIpList ...string) (responseIpList [
 
 			resp, err := client.Do(req)
 			time.Sleep(500 * time.Millisecond)
-			Error.HandleError(err)
+			if err != nil {
+				continue
+			}
 			responseIpList = append(responseIpList, net2.HandleResponse(resp))
 		}
 	}

@@ -87,4 +87,9 @@ func FetchResultFromChanel(resultChannel chan []string) {
 		define.ResultList = append(define.ResultList, v...)
 		mu.Unlock()
 	}
+
+	mu.Lock()
+	define.ResultList = Compare.RemoveDuplicates(define.ResultList)
+	WriteToFile(define.ResultList, define.OutPut)
+	mu.Unlock()
 }
