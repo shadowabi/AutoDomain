@@ -62,7 +62,7 @@ Use "AutoDomain [command] --help" for more information about a command.
 3. 可识别 URL，自动提取域名、ip
 4. 自动去重(http 与 https 不去重）
 5. 阶段性保存，当使用 all 模块时，每完成一个模块均会自动写入到文件，防止结果丢失
-6. 自动识别输出格式，支持txt和json格式
+6. 自动识别输出格式，支持 txt 和 json 格式
 
 ## 旧版本
 
