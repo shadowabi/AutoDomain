@@ -46,7 +46,7 @@ Flags:
   -f, --file string       从文件中读取目标地址 (Input FILENAME)
   -h, --help              help for AutoDomain
       --logLevel string   设置日志等级 (Set log level) [trace|debug|info|warn|error|fatal|panic] (default "info")
-  -o, --output string     输入结果文件输出的位置 (Enter the location of the scan result output) (default "./result.txt")
+  -o, --output string     指定输出位置和格式 [result.txt|result.json] (Specify output location and format [result.txt|result.json]) (default "result.txt")
   -t, --timeout int       输入每个 http 请求的超时时间 (Enter the timeout period for every http request) (default 15)
   -u, --url string        输入目标地址 (Input [ip|domain|url])
 
@@ -62,6 +62,7 @@ Use "AutoDomain [command] --help" for more information about a command.
 3. 可识别 URL，自动提取域名、ip
 4. 自动去重(http 与 https 不去重）
 5. 阶段性保存，当使用 all 模块时，每完成一个模块均会自动写入到文件，防止结果丢失
+6. 自动识别输出格式，支持txt和json格式
 
 ## 旧版本
 
