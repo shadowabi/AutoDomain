@@ -7,6 +7,7 @@ import (
 	"github.com/shadowabi/AutoDomain_rebuild/utils/Error"
 	"github.com/spf13/cobra"
 	"os"
+	"runtime"
 )
 
 var RootCmd = &cobra.Command{
@@ -46,18 +47,20 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&define.File, "file", "f", "", "从文件中读取目标地址 (Input FILENAME)")
 	RootCmd.PersistentFlags().StringVarP(&define.Url, "url", "u", "", "输入目标地址 (Input [ip|domain|url])")
 	RootCmd.PersistentFlags().IntVarP(&define.TimeOut, "timeout", "t", 15, "输入每个 http 请求的超时时间 (Enter the timeout period for every http request)")
-	RootCmd.PersistentFlags().StringVarP(&define.OutPut, "output", "o", "./result.txt", "输入结果文件输出的位置 (Enter the location of the scan result output)")
+	RootCmd.PersistentFlags().StringVarP(&define.OutPut, "output", "o", "result.txt", "指定输出位置和格式 [result.txt|result.json] (Specify output location and format [result.txt|result.json])")
 }
 
 func Execute() {
-	cc.Init(&cc.Config{
-		RootCmd:  RootCmd,
-		Headings: cc.HiGreen + cc.Underline,
-		Commands: cc.Cyan + cc.Bold,
-		Example:  cc.Italic,
-		ExecName: cc.Bold,
-		Flags:    cc.Cyan + cc.Bold,
-	})
+	if runtime.GOOS != "windows" {
+		cc.Init(&cc.Config{
+			RootCmd:  RootCmd,
+			Headings: cc.HiGreen + cc.Underline,
+			Commands: cc.Cyan + cc.Bold,
+			Example:  cc.Italic,
+			ExecName: cc.Bold,
+			Flags:    cc.Cyan + cc.Bold,
+		})
+	}
 	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

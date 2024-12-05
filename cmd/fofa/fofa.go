@@ -20,7 +20,7 @@ var FofaCmd = &cobra.Command{
 	Use:   "fofa",
 	Short: "search domain from fofa",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if config.C.FofaKey == "" || config.C.FofaMail == "" {
+		if config.C.FofaKey == "" {
 			return errors.New("未配置 fofa 相关的凭证")
 		}
 		return nil

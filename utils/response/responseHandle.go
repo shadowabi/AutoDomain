@@ -16,6 +16,7 @@ func HandleResponse(resp *http.Response) (bodyString string) {
 		return ""
 	}
 	bodyString = bodyBuf.String()
+	//print(bodyString)
 	return bodyString
 }
 

@@ -51,7 +51,6 @@ func InitConfigure(file string) {
 }
 
 func SaveConfig(file string) {
-	GlobalConfig.Set("FofaMail", "")
 	GlobalConfig.Set("FofaKey", "")
 	GlobalConfig.Set("QuakeKey", "")
 	GlobalConfig.Set("HunterKey", "")

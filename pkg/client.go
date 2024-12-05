@@ -18,8 +18,7 @@ func GenerateHTTPClient(timeOut int) *http.Client {
 }
 
 func IsEmptyConfig(c define.Configure) bool {
-	return c.FofaMail == "" &&
-		c.FofaKey == "" &&
+	return c.FofaKey == "" &&
 		c.QuakeKey == "" &&
 		c.HunterKey == "" &&
 		c.ZoomeyeKey == "" &&

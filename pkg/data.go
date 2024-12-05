@@ -74,7 +74,16 @@ func MergeReqListToReqStringList(mode string, reqIpList []string, reqDomainList 
 			reqStringList = append(reqStringList, fmt.Sprintf("ip%v\"%v\"", grammar, host))
 		}
 		for _, host := range reqDomainList {
-			reqStringList = append(reqStringList, fmt.Sprintf("domain%v\"%v\"", grammar, host))
+			switch mode {
+			case "fofa":
+				reqStringList = append(reqStringList, fmt.Sprintf("domain%v\"%v\"||cert.subject.cn%v\"%v\"", grammar, host, grammar, host))
+			case "hunter":
+				reqStringList = append(reqStringList, fmt.Sprintf("domain%v\"%v\"||cert.subject%v\"%v\"", grammar, host, grammar, host))
+			case "quake":
+				reqStringList = append(reqStringList, fmt.Sprintf("domain%v\"%v\" OR cert%v\"%v\"", grammar, host, grammar, host))
+			default:
+				reqStringList = append(reqStringList, fmt.Sprintf("domain%v\"%v\"", grammar, host))
+			}
 		}
 	}
 	return reqStringList
